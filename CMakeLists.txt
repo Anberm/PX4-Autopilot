@@ -120,9 +120,20 @@ execute_process(
 	WORKING_DIRECTORY ${PX4_SOURCE_DIR}
 	)
 
-# if proper git tag unavilable default to v0.0.0
+# if proper git tag unavailable, try to read version from package.xml, else default to v0.0.0
 if(NOT ${GIT_DESCRIBE_RESULT} MATCHES "0")
-	set(PX4_GIT_TAG "v0.0.0")
+	set(PX4_GIT_TAG "")
+	set(package_xml_path "${PX4_SOURCE_DIR}/package.xml")
+	if(EXISTS ${package_xml_path})
+		file(READ ${package_xml_path} package_xml_content)
+		string(REGEX MATCH "<version>([0-9]+\\.[0-9]+\\.[0-9]+)</version>" package_xml_version ${package_xml_content})
+		if(CMAKE_MATCH_1)
+			set(PX4_GIT_TAG "v${CMAKE_MATCH_1}")
+		endif()
+	endif()
+	if(PX4_GIT_TAG STREQUAL "")
+		set(PX4_GIT_TAG "v0.0.0")
+	endif()
 endif()
 
 message(STATUS "PX4_GIT_TAG: ${PX4_GIT_TAG}")
