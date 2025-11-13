@@ -1,0 +1,33 @@
+CompileFlags:
+  # 让 clangd 在工程根读取编译数据库
+  CompilationDatabase: compile_commands.json
+  # 可选：为首次索引提供兜底包含路径（有了 compile_commands.json 后以其为准）
+  Add:
+    - -Ibuild/kite_h743-v2
+    - -Ibuild/kite_h743-v2/uORB/topics
+    - -Ibuild/kite_h743-v2/parameters
+    - -Ibuild/kite_h743-v2/NuttX/nuttx-export/include
+    - -Ibuild/kite_h742-v2_default
+    - -Ibuild/kite_h742-v2_default/uORB/topics
+    - -Ibuild/kite_h742-v2_default/parameters
+    - -Ibuild/kite_h742-v2_default/NuttX/nuttx-export/include
+    - -Wno-unknown-warning-option
+    - -Wno-gnu-zero-variadic-macro-arguments
+    - -Wno-unused-parameter
+    - -Wno-c++98-compat
+    - -Wno-c++98-compat-pedantic
+    - -Wno-exit-time-destructors
+    - -Wno-global-constructors
+    - -Wno-unused-private-field
+
+Diagnostics:
+  ClangTidy:
+    Add:
+      - -readability-*
+      - -modernize-*
+      - -bugprone-*
+    Remove:
+      - cppcoreguidelines-avoid-magic-numbers
+      - readability-magic-numbers
+
+
