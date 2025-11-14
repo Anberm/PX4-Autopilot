@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ************************************************************************************/
-#ifndef __NUTTX_CONFIG_KITE742V2_INCLUDE_BOARD_H
-#define __NUTTX_CONFIG_KITE742V2_INCLUDE_BOARD_H
+#ifndef __NUTTX_CONFIG_Kite743v2_INCLUDE_BOARD_H
+#define __NUTTX_CONFIG_Kite743v2_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -415,4 +415,4 @@
 # define PROBE(n,s)
 # define PROBE_MARK(n)
 
-#endif  /*__NUTTX_CONFIG_KITE742V2_INCLUDE_BOARD_H  */
+#endif  /*__NUTTX_CONFIG_Kite743v2_INCLUDE_BOARD_H  */

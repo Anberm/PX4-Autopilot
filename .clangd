@@ -7,10 +7,10 @@ CompileFlags:
     - -Ibuild/kite_h743-v2/uORB/topics
     - -Ibuild/kite_h743-v2/parameters
     - -Ibuild/kite_h743-v2/NuttX/nuttx-export/include
-    - -Ibuild/kite_h742-v2_default
-    - -Ibuild/kite_h742-v2_default/uORB/topics
-    - -Ibuild/kite_h742-v2_default/parameters
-    - -Ibuild/kite_h742-v2_default/NuttX/nuttx-export/include
+    - -Ibuild/kite_h743-v2_default
+    - -Ibuild/kite_h743-v2_default/uORB/topics
+    - -Ibuild/kite_h743-v2_default/parameters
+    - -Ibuild/kite_h743-v2_default/NuttX/nuttx-export/include
     - -Wno-unknown-warning-option
     - -Wno-gnu-zero-variadic-macro-arguments
     - -Wno-unused-parameter

@@ -4,7 +4,7 @@ set -euo pipefail
 # 用法：
 #   scripts/gen_compile_commands.sh <board> [config]
 # 示例：
-#   scripts/gen_compile_commands.sh kite_h742-v2 default
+#   scripts/gen_compile_commands.sh kite_h743-v2 default
 #   scripts/gen_compile_commands.sh px4_sitl
 #
 # 说明：在工程根执行本脚本，将在 build/<board>_<config> 生成编译数据库并软链到 compile_commands.json

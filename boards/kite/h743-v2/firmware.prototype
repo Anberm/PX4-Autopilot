@@ -1,10 +1,10 @@
 {
-    "board_id": 1277,
+    "board_id": 1179,
     "magic": "PX4FWv1",
-    "description": "Firmware for the Kite742v2 board",
+    "description": "Firmware for the Kite743v2 board",
     "image": "",
     "build_time": 0,
-    "summary": "Kite742v2",
+    "summary": "Kite743v2",
     "version": "0.1",
     "image_size": 0,
     "image_maxsize": 1966080,
