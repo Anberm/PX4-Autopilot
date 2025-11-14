@@ -1,4 +1,26 @@
 {
+	"C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json",
+	"clangd.arguments": [
+		"--compile-commands-dir=${workspaceFolder}",
+		"--background-index",
+		"--all-scopes-completion",
+		"--pch-storage=memory",
+		"--clang-tidy",
+		"--header-insertion=never",
+		"--completion-style=detailed"
+	],
+	"files.associations": {
+		"px4_config.h": "c",
+		"*.hpp": "cpp"
+	},
+	"search.exclude": {
+		"**/build": true
+	},
+	"files.watcherExclude": {
+		"**/build/**": true
+	}
+}
+{
         "astyle.astylerc": "${workspaceFolder}/Tools/astyle/astylerc",
         "astyle.c.enable": true,
         "astyle.cpp.enable": true,
@@ -128,5 +150,8 @@
         "terminal.integrated.scrollback": 15000,
         "yaml.schemas": {
                 "${workspaceFolder}/validation/module_schema.yaml": "${workspaceFolder}/src/modules/*/module.yaml"
+        },
+        "[cpp]": {
+                "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
         },
 }
