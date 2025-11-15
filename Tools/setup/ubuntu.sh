@@ -176,9 +176,23 @@ if [[ $INSTALL_NUTTX == "true" ]]; then
 
 		echo
 		echo "Fetching Xtensa compilers"
-		wget --progress=bar:force:noscroll -P $DIR https://github.com/espressif/crosstool-NG/releases/download/esp-13.2.0_20240530/xtensa-esp-elf-13.2.0_20240530-x86_64-linux-gnu.tar.xz
-		sudo tar -xf $DIR/xtensa-esp-elf-13.2.0_20240530-x86_64-linux-gnu.tar.xz -C /opt
-		echo 'export PATH=$PATH:/opt/xtensa-esp-elf/bin/' >> /home/$USER/.bashrc
+		XTENSA_TAR="$DIR/xtensa-esp-elf-13.2.0_20240530-x86_64-linux-gnu.tar.xz"
+		if [ -f "$XTENSA_TAR" ]; then
+			echo "[ubuntu.sh] $XTENSA_TAR already exists, skipping download"
+		else
+			wget --progress=bar:force:noscroll -P $DIR https://github.com/espressif/crosstool-NG/releases/download/esp-13.2.0_20240530/xtensa-esp-elf-13.2.0_20240530-x86_64-linux-gnu.tar.xz
+		fi
+		sudo tar -xf "$XTENSA_TAR" -C /opt
+		# system-wide PATH for all users via /etc/profile.d
+		SYSTEM_PROFILE_D="/etc/profile.d"
+		PATH_FILE="$SYSTEM_PROFILE_D/xtensa-esp-elf.sh"
+		PATH_LINE='export PATH="/opt/xtensa-esp-elf/bin:$PATH"'
+		if [ -d "$SYSTEM_PROFILE_D" ]; then
+			echo "$PATH_LINE" | sudo tee "$PATH_FILE" > /dev/null
+			sudo chmod 644 "$PATH_FILE"
+		fi
+		# also update current shell so it's usable immediately
+		export PATH="/opt/xtensa-esp-elf/bin:$PATH"
 	fi
 
 	if [[ "${INSTALL_ARCH}" == "aarch64" ]]; then
