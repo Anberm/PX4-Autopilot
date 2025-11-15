@@ -112,7 +112,7 @@ echo "[ubuntu.sh] Installing PX4 Python3 dependencies"
 PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
 REQUIRED_VERSION="3.11"
 if [[ "$(printf '%s\n' "$REQUIRED_VERSION" "$PYTHON_VERSION" | sort -V | head -n1)" == "$REQUIRED_VERSION" ]]; then
-	python3 -m pip install --break-system-packages -r ${DIR}/requirements.txt
+	python3 -m pip install --break-system-packages -r ${DIR}/requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 else
 	if [ -n "$VIRTUAL_ENV" ]; then
 		# virtual environments don't allow --user option
@@ -176,7 +176,7 @@ if [[ $INSTALL_NUTTX == "true" ]]; then
 
 		echo
 		echo "Fetching Xtensa compilers"
-		wget -q -P $DIR https://github.com/espressif/crosstool-NG/releases/download/esp-13.2.0_20240530/xtensa-esp-elf-13.2.0_20240530-x86_64-linux-gnu.tar.xz
+		wget --progress=bar:force:noscroll -P $DIR https://github.com/espressif/crosstool-NG/releases/download/esp-13.2.0_20240530/xtensa-esp-elf-13.2.0_20240530-x86_64-linux-gnu.tar.xz
 		sudo tar -xf $DIR/xtensa-esp-elf-13.2.0_20240530-x86_64-linux-gnu.tar.xz -C /opt
 		echo 'export PATH=$PATH:/opt/xtensa-esp-elf/bin/' >> /home/$USER/.bashrc
 	fi
