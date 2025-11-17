@@ -56,6 +56,7 @@
 /* PX4FMU GPIOs ***********************************************************************************/
 /* LEDs */
 #define GPIO_LED1		(GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN8)
+#define GPIO_LED2		(GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN5)  /* GPS status LED */
 #define BOARD_OVERLOAD_LED     LED_RED
 
 /*
@@ -86,9 +87,10 @@
 #define GPIO_TONE_ALARM_IDLE	(GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN7)
 #define GPIO_TONE_ALARM		(GPIO_ALT|GPIO_AF9|GPIO_SPEED_2MHz|GPIO_PUSHPULL|GPIO_PORTA|GPIO_PIN7)
 
-/* AUX PWMs
+/* AUX PWMs - 8 direct channels + PCA9685 for extended servo support
  */
-#define DIRECT_PWM_OUTPUT_CHANNELS	8
+#define DIRECT_PWM_OUTPUT_CHANNELS	8  /* M1-M8 channels for motors/ESCs */
+#define NUM_SERVO_CHANNELS	10          /* S1-S10 servo channels via PCA9685 */
 
 /* USB OTG FS
  *

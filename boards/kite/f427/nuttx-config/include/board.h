@@ -223,7 +223,8 @@
 #define GPIO_UART7_RX	GPIO_UART7_RX_1
 #define GPIO_UART7_TX	GPIO_UART7_TX_1
 
-/* UART8 has no alternate pin config */
+#define GPIO_UART8_RX	GPIO_UART8_RX_1   /* UART8 alternative pin mapping */
+#define GPIO_UART8_TX	GPIO_UART8_TX_1
 
 /*
  * CAN
