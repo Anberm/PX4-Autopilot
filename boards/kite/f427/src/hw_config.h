@@ -33,6 +33,14 @@
 
 #pragma once
 
+/* STM32F4 compatibility - use AHB2 for OTG FS reset on F4 series */
+#ifndef RCC_AHB1RSTR_OTGFSRST
+#  define RCC_AHB1RSTR_OTGFSRST  RCC_AHB2RSTR_OTGFSRST
+#endif
+
+#undef STM32_RCC_AHB1RSTR
+#define STM32_RCC_AHB1RSTR     STM32_RCC_AHB2RSTR
+
 /****************************************************************************
  * Bootloader Configuration for Kite F427 v1
  *
