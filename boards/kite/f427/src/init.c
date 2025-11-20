@@ -72,9 +72,11 @@
 #include <drivers/drv_hrt.h>
 #include <drivers/drv_board_led.h>
 
+#ifndef CONFIG_BOOTLOADER
 #include <px4_platform_common/init.h>
 #include <px4_platform/board_dma_alloc.h>
 #include <px4_arch/io_timer.h>
+#endif
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -106,6 +108,10 @@ __END_DECLS
  ************************************************************************************/
 __EXPORT void board_on_reset(int status)
 {
+#ifdef CONFIG_BOOTLOADER
+	/* Bootloader: minimal reset handling */
+	(void)status;
+#else
 	/* configure the GPIO pins to outputs and keep them low */
 	for (int i = 0; i < DIRECT_PWM_OUTPUT_CHANNELS; ++i) {
 		px4_arch_configgpio(io_timer_channel_get_gpio_output(i));
@@ -119,6 +125,7 @@ __EXPORT void board_on_reset(int status)
 	if (status >= 0) {
 		up_mdelay(400);
 	}
+#endif
 }
 
 /****************************************************************************
@@ -137,6 +144,10 @@ __EXPORT void board_on_reset(int status)
 __EXPORT void
 stm32_boardinitialize(void)
 {
+#ifdef CONFIG_BOOTLOADER
+	/* Bootloader: minimal board initialization */
+	board_autoled_initialize();
+#else
 	// Reset all PWM to Low outputs.
 
 	board_on_reset(-1);
@@ -174,7 +185,7 @@ stm32_boardinitialize(void)
 
 	stm32_configgpio(GPIO_I2C1_SCL);
 	stm32_configgpio(GPIO_I2C1_SDA);
-
+#endif
 }
 
 /****************************************************************************
@@ -202,13 +213,20 @@ stm32_boardinitialize(void)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_BOOTLOADER
 static struct spi_dev_s *spi1;
 static struct spi_dev_s *spi2;
 static struct spi_dev_s *spi4;
 static struct sdio_dev_s *sdio;
+#endif
 
 __EXPORT int board_app_initialize(uintptr_t arg)
 {
+	(void)arg;
+#ifdef CONFIG_BOOTLOADER
+	/* Bootloader: minimal app initialization */
+	return OK;
+#else
 	px4_platform_init();
 
 	/* configure the DMA allocator */
@@ -296,4 +314,5 @@ __EXPORT int board_app_initialize(uintptr_t arg)
 	px4_platform_configure();
 
 	return OK;
+#endif
 }

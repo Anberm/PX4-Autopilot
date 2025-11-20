@@ -41,6 +41,8 @@
 #undef STM32_RCC_AHB1RSTR
 #define STM32_RCC_AHB1RSTR     STM32_RCC_AHB2RSTR
 
+#define MK_GPIO_INPUT(def) (((def) & (GPIO_PORT_MASK | GPIO_PIN_MASK | GPIO_MODE_MASK)) | (GPIO_INPUT))
+
 /****************************************************************************
  * Bootloader Configuration for Kite F427 v1
  *
@@ -58,6 +60,7 @@
 #define SERIAL1_DEV    0x04
 
 /* Bootloader Configuration */
+#define BOOTLOADER_RESERVATION_SIZE    (128 * 1024)
 #define APP_LOAD_ADDRESS               0x08020000
 #define BOOTLOADER_DELAY               5000
 #define INTERFACE_USB                  1
@@ -72,6 +75,7 @@
 #define _FLASH_KBYTES                  (*(uint32_t *)0x1FFF7A22)  /* STM32F427 flash size register */
 #define BOARD_FLASH_SECTORS            (11)      /* Last sector index for STM32F4 (0-11) */
 #define BOARD_FLASH_SIZE               (_FLASH_KBYTES * 1024)
+#define APP_SIZE_MAX                   (BOARD_FLASH_SIZE - (BOOTLOADER_RESERVATION_SIZE + APP_RESERVATION_SIZE))
 
 #define OSC_FREQ                       8
 
