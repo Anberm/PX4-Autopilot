@@ -1,0 +1,108 @@
+Altium Designer Pick and Place Locations
+
+========================================================================================================================
+File Design Information:
+
+Date:       29/07/25
+Time:       17:38
+Revision:   Not in VersionControl
+Variant:    No variations
+Units used: mil
+
+Designator Comment Layer       Footprint Center-X(mil) Center-Y(mil) Rotation Description                      
+U9         U9      TopLayer    18        672.500       744.500       0        "BMI088 LGA-16(3x4.5)"           
+J41        J41     TopLayer    17        680.000       738.000       0        NC                               
+D40        D40     TopLayer    16        386.000       298.500       0        0402ESDA-05N                     
+C39        C39     TopLayer    15        671.000       848.000       0        CL05B104KB54PNC                  
+C38        C38     TopLayer    15        533.000       827.000       90       HGC0402R5225K250NTEJ             
+R37        R37     TopLayer    15        1084.000      953.000       90       0402WGF1001TCE                   
+C36        C36     TopLayer    15        952.000       683.000       90       CL05A105KA5NQNC                  
+C35        C35     TopLayer    15        951.000       761.000       90       CL05A105KA5NQNC                  
+R34        R34     TopLayer    15        954.000       866.000       0        0402WGF1002TCE                   
+C33        C33     TopLayer    15        1010.000      641.000       0        CL05B104KB54PNC                  
+R32        R32     TopLayer    15        1101.000      668.000       0        0402WGF1002TCE                   
+R31        R31     TopLayer    15        1101.000      709.000       0        0402WGF4700TCE                   
+R30        R30     TopLayer    15        1102.000      753.000       0        0402WGF4700TCE                   
+R29        R29     TopLayer    15        1103.000      798.000       0        0402WGF4700TCE                   
+R28        R28     TopLayer    15        1106.000      867.000       0        0402WGF1001TCE                   
+R27        R27     TopLayer    15        1055.000      335.000       90       0402WGF1002TCE                   
+C26        C26     TopLayer    15        1054.000      255.000       90       CL05B104KB54PNC                  
+R25        R25     TopLayer    15        930.000       579.000       90       0402WGF1002TCE                   
+C24        C24     TopLayer    15        759.000       537.000       90       CL05B104KB54PNC                  
+C23        C23     TopLayer    15        574.000       573.000       90       CGA0402X5R475M250GT              
+C22        C22     TopLayer    15        537.000       571.000       90       CL05A224KA5NNNC                  
+C21        C21     TopLayer    15        613.000       648.000       0        CL05B104KB54PNC                  
+R20        R20     TopLayer    15        678.000       460.000       0        0402WGF1001TCE                   
+R19        R19     TopLayer    15        679.000       418.000       0        0402WGF1001TCE                   
+C18        C18     TopLayer    15        595.000       417.000       0        CGA0402X5R475M250GT              
+C17        C17     TopLayer    15        594.000       458.000       0        CL05B104KB54PNC                  
+C16        C16     TopLayer    15        502.500       417.000       0        CGA0402X5R475M250GT              
+U15        U15     TopLayer    14        336.000       770.000       0        "NUF2042XV6T1G SOT-563"          
+D14        D14     TopLayer    13        395.000       475.500       0        "B5819W SOD-123"                 
+U13        U13     TopLayer    12        551.000       333.000       0        "LP5907MFX-3.3/NOPB SOT-23-5"    
+Q12        Q12     TopLayer    11        862.000       705.000       0        "REF3030AIDBZR SOT-23"           
+U11        U11     TopLayer    10        835.500       570.500       0        "SPL06-001 LGA-8(2x2.5)"         
+U10        U10     TopLayer    9         665.000       552.000       0        "QMC5883L LGA-16(3x3)"           
+U8         U8      TopLayer    7         919.000       358.000       0        "FM25V02A-GTR SOIC-8"            
+D7         D7      TopLayer    6         1256.500      762.500       0        XL-3227SURUGC                    
+J6         J6      TopLayer    5         1223.500      1057.000      0        A1257WR-S-6P                     
+J5         J5      TopLayer    4         1224.500      444.500       0        A1257WR-S-7P                     
+J4         J4      TopLayer    3         148.250       739.500       0        "TYPE-C 24P QT"                  
+J3         J3      TopLayer    2         122.250       372.000       0        A1257WR-S-4P                     
+J2         J2      TopLayer    2         125.500       1105.500      0        A1257WR-S-4P                     
+J1         J1      TopLayer    1         672.750       1062.000      0        TFM-120-02-L-D-A                 
+C58        C58     BottomLayer 0805      473.499       386.025       90       C2012X5R1A336MTJ00E              
+C68        C68     BottomLayer 0805      258.599       1031.025      90       C2012X5R1A336MTJ00E              
+J94        J94     BottomLayer 23        667.000       96.000        180      "IFCS-CH_V.0 PCBA"               
+J93        J93     BottomLayer 23        687.000       1386.000      0        "IFCS-CH_V.1 PCBA"               
+U92        U92     BottomLayer 22        861.300       651.300       0        "STM32F427VIT6 LQFP-100(14x14)"  
+Y91        Y91     BottomLayer 21        1288.000      693.000       0        X322524MSB4SI                    
+U90        U90     BottomLayer 20        379.100       771.600       0        "CSNP32GCR01-AOW LGA-8(6.2x8)"   
+R89        R89     BottomLayer 15        126.900       688.800       45       0402WGF5101TCE                   
+D88        D88     BottomLayer 19        153.743       219.000       45       "RSM11D213T SOD523"              
+D87        D87     BottomLayer 19        567.982       191.482       270      "RSM11D213T SOD523"              
+D86        D86     BottomLayer 19        787.682       197.682       270      "RSM11D213T SOD523"              
+D85        D85     BottomLayer 19        986.482       176.082       270      "RSM11D213T SOD523"              
+D84        D84     BottomLayer 19        206.718       304.282       0        "RSM11D213T SOD523"              
+D83        D83     BottomLayer 19        467.618       212.382       0        "RSM11D213T SOD523"              
+D82        D82     BottomLayer 19        409.818       211.082       0        "RSM11D213T SOD523"              
+D81        D81     BottomLayer 19        669.818       216.182       0        "RSM11D213T SOD523"              
+D80        D80     BottomLayer 19        866.418       203.982       0        "RSM11D213T SOD523"              
+D79        D79     BottomLayer 19        1126.418      221.782       0        "RSM11D213T SOD523"              
+D78        D78     BottomLayer 19        1193.218      222.082       0        "RSM11D213T SOD523"              
+D77        D77     BottomLayer 19        1267.618      222.682       0        "RSM11D213T SOD523"              
+D76        D76     BottomLayer 13        1312.000      1158.000      180      "PTVS3V3S1UR,115 SOD-123"        
+D75        D75     BottomLayer 13        68.800        390.000       0        "PTVS3V3S1UR,115 SOD-123"        
+U74        U74     BottomLayer 12        363.100       383.800       0        "LP5907MFX-3.3/NOPB SOT-23-5"    
+U73        U73     BottomLayer 12        146.800       1070.000      0        "SN74LVC1G86DBVT SOT-23-5"       
+Q72        Q72     BottomLayer 11        1182.500      1142.500      90       "SS8050-G(RANGE:200-350) SOT-23" 
+C71        C71     BottomLayer 15        355.000       469.000       180      CGA0402X5R475M250GT              
+R70        R70     BottomLayer 15        701.300       1045.000      90       0402WGF330JTCE                   
+C69        C69     BottomLayer 15        519.400       941.300       90       CL05B104KB54PNC                  
+R68        R68     BottomLayer 15        469.000       1024.000      90       0402WGF1002TCE                   
+R67        R67     BottomLayer 15        426.000       1025.000      90       0402WGF1002TCE                   
+C66        C66     BottomLayer 15        195.000       962.000       90       CGA0402X5R475M250GT              
+R65        R65     BottomLayer 15        234.400       785.600       90       0402WGF5101TCE                   
+C64        C64     BottomLayer 15        285.000       544.000       90       CL05B103KB5NNNC                  
+C63        C63     BottomLayer 15        317.000       542.000       90       CL05B104KB54PNC                  
+R62        R62     BottomLayer 15        348.000       544.000       90       0402WGF0000TCE                   
+R61        R61     BottomLayer 15        379.000       543.000       90       0402WGF1002TCE                   
+R60        R60     BottomLayer 15        413.000       545.000       90       0402WGF1002TCE                   
+R59        R59     BottomLayer 15        444.000       545.000       90       0402WGF1002TCE                   
+R58        R58     BottomLayer 15        86.000        194.000       0        0402WGF2200TCE                   
+C57        C57     BottomLayer 15        625.000       272.000       0        HGC0402R5225K250NTEJ             
+C56        C56     BottomLayer 15        566.000       316.000       270      CGA0402X5R475M250GT              
+C55        C55     BottomLayer 15        448.000       289.000       180      CL05B104KB54PNC                  
+C54        C54     BottomLayer 15        1067.000      248.000       90       CL05B104KB54PNC                  
+C53        C53     BottomLayer 15        1314.000      585.000       0        0402CG200J500NT                  
+C52        C52     BottomLayer 15        1269.000      505.000       180      CL05B104KB54PNC                  
+R51        R51     BottomLayer 15        1255.000      823.000       180      0402WGF1000TCE                   
+C50        C50     BottomLayer 15        1333.000      833.000       90       0402CG200J500NT                  
+R49        R49     BottomLayer 15        1254.100      909.400       180      0402WGF2200TCE                   
+R48        R48     BottomLayer 15        1252.200      949.100       180      0402WGF2200TCE                   
+R47        R47     BottomLayer 15        1251.600      984.700       180      0402WGF2200TCE                   
+R46        R46     BottomLayer 15        1252.200      1019.100      180      0402WGF1002TCE                   
+C45        C45     BottomLayer 15        1087.500      1023.800      180      CL05B104KB54PNC                  
+R44        R44     BottomLayer 15        1186.000      1253.000      90       0402WGF0000TCE                   
+R43        R43     BottomLayer 15        1227.000      1257.000      90       0402WGF2200TCE                   
+R42        R42     BottomLayer 15        1262.000      1253.000      90       0402WGF2200TCE                   
