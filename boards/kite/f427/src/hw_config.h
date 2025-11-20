@@ -96,8 +96,9 @@
 /* ========== LED Configuration - using GPIO outputs ========== */
 /* LED configuration verified from schematic DXF */
 /* LED_Activity (D7): PA4, LED_Bootloader (D14): PA2 */
-#define BOARD_PIN_LED_ACTIVITY         (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
-#define BOARD_PIN_LED_BOOTLOADER       (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN2)
+/* Initial state: GPIO_OUTPUT_CLEAR (0=ON, 1=OFF for active-low open-drain) */
+#define BOARD_PIN_LED_ACTIVITY         (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN4)
+#define BOARD_PIN_LED_BOOTLOADER       (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN2)
 /* LED active-low logic (0=ON, 1=OFF) */
 #define BOARD_LED_ON                   0
 #define BOARD_LED_OFF                  1
