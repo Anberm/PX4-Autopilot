@@ -79,9 +79,26 @@
 
 #define OSC_FREQ                       8
 
-/* LED Configuration - using GPIO outputs */
-#define BOARD_PIN_LED_ACTIVITY         GPIO_LED1
-#define BOARD_PIN_LED_BOOTLOADER       GPIO_LED2
+/* ========== USB Configuration (OTG FS) ========== */
+#define INTERFACE_USB                  1
+#define USBDEVICESTRING                "PX4 BL KiteF427"
+#define USBPRODUCTID                   0x0022
+#define BOARD_USB_VBUS_SENSE_DISABLED  0
+/* USB VBUS sensing on PA9 - configured in board_config.h */
+
+/* ========== UART Configuration (for bootloader UART channel) ========== */
+/* UART1 verified from schematic: TX=PB6, RX=PB7 */
+#define INTERFACE_USART                1
+#define BOARD_USART                    USART1
+#define BOARD_USART_CLOCK_REGISTER     RCC_APB2ENR
+#define BOARD_USART_CLOCK_BIT          RCC_APB2ENR_USART1EN
+
+/* ========== LED Configuration - using GPIO outputs ========== */
+/* LED configuration verified from schematic DXF */
+/* LED_Activity (D7): PA4, LED_Bootloader (D14): PA2 */
+#define BOARD_PIN_LED_ACTIVITY         (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN4)
+#define BOARD_PIN_LED_BOOTLOADER       (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN2)
+/* LED active-low logic (0=ON, 1=OFF) */
 #define BOARD_LED_ON                   0
 #define BOARD_LED_OFF                  1
 
