@@ -106,7 +106,7 @@ static void board_init(void)
 
 #if INTERFACE_USB
 #if !defined(BOARD_USB_VBUS_SENSE_DISABLED)
-	/* Use complete GPIO_OTGFS_VBUS configuration from board_config.h */
+/* Use complete GPIO_OTGFS_VBUS configuration from board_config.h */
 	/* This preserves all GPIO flags: PORT, PIN, OPENDRAIN, SPEED, etc. */
 	px4_arch_configgpio(GPIO_OTGFS_VBUS);
 #endif
@@ -180,7 +180,17 @@ inline void arch_systic_deinit(void)
 
 static inline void clock_init(void)
 {
-	// Done by NuttX
+
+	modifyreg32(STM32_RCC_AHB1ENR, 0, RCC_AHB1ENR_GPIOAEN);
+	
+
+	modifyreg32(STM32_RCC_AHB2ENR, 0, RCC_AHB2ENR_OTGFSEN);
+	
+	/* Enable USART1 clock for bootloader serial interface */
+	modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_USART1EN);
+	
+	/* Small delay to ensure clock is stable */
+	for (volatile int i = 0; i < 1000; i++);
 }
 
 void clock_deinit(void)
@@ -427,14 +437,17 @@ int bootloader_main(void)
 #endif
 #endif
 
-	if (try_boot) {
-#ifdef BOARD_BOOT_FAIL_DETECT
-		board_set_rtc_signature(BOOT_RTC_SIGNATURE);
+	(void)try_boot;
+	try_boot = false;
+	timeout = 10000; 
+	
+#if defined(BOARD_PIN_LED_ACTIVITY)
+	px4_arch_gpiowrite(BOARD_PIN_LED_ACTIVITY, BOARD_LED_ON);
+	for(volatile int i = 0; i < 1000000; i++);  
+	px4_arch_gpiowrite(BOARD_PIN_LED_ACTIVITY, BOARD_LED_OFF);
+	for(volatile int i = 0; i < 1000000; i++);  
+	px4_arch_gpiowrite(BOARD_PIN_LED_ACTIVITY, BOARD_LED_ON);
 #endif
-		jump_to_app();
-		board_set_rtc_signature(BOOT_RTC_SIGNATURE);
-		timeout = 0;
-	}
 
 #if INTERFACE_USART
 #ifdef INTERFACE_USART_CONFIG
