@@ -95,9 +95,9 @@
 
 /* USB OTG FS
  *
- * PA9  OTG_FS_VBUS VBUS sensing - Standard STM32F4 configuration
+ * PA9  OTG_FS_VBUS VBUS sensing - STM32F4 standard configuration
  */
-#define GPIO_OTGFS_VBUS		(GPIO_INPUT|GPIO_PULLDOWN|GPIO_SPEED_100MHz|GPIO_PORTA|GPIO_PIN9)
+#define GPIO_OTGFS_VBUS		(GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
 
 /* UART Configuration (Bootloader and Application) */
 /* USART1 is on PB6 (TX) and PB7 (RX) with Alternate Function 7 */

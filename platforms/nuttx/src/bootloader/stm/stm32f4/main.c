@@ -106,11 +106,9 @@ static void board_init(void)
 
 #if INTERFACE_USB
 #if !defined(BOARD_USB_VBUS_SENSE_DISABLED)
-#  if defined(USE_VBUS_PULL_DOWN)
-	px4_arch_configgpio((GPIO_OTGFS_VBUS & GPIO_PUPD_MASK) | GPIO_PULLDOWN);
-#  else
-	px4_arch_configgpio((GPIO_OTGFS_VBUS & GPIO_PUPD_MASK) | GPIO_FLOAT);
-#  endif
+	/* Use complete GPIO_OTGFS_VBUS configuration from board_config.h */
+	/* This preserves all GPIO flags: PORT, PIN, OPENDRAIN, SPEED, etc. */
+	px4_arch_configgpio(GPIO_OTGFS_VBUS);
 #endif
 #endif
 

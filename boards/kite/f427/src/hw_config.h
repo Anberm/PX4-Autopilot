@@ -85,6 +85,8 @@
 #define USBPRODUCTID                   0x0022
 #define BOARD_USB_VBUS_SENSE_DISABLED  0
 /* USB VBUS sensing on PA9 - configured in board_config.h */
+/* BOARD_VBUS is required for bootloader to detect USB connection */
+#define BOARD_VBUS                     MK_GPIO_INPUT(GPIO_OTGFS_VBUS)
 
 /* ========== UART Configuration (for bootloader UART channel) ========== */
 /* UART1 verified from schematic: TX=PB6, RX=PB7 */
