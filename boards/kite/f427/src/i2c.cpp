@@ -31,16 +31,8 @@
  *
  ****************************************************************************/
 
-/**
- * @file i2c.cpp
- *
- * I2C bus configuration for Kite F427
- * I2C1: Onboard sensors (QMC5883L magnetometer, SPL06-001 barometer)
- *   SCL: PB8, SDA: PB9
- */
-
 #include <px4_arch/i2c_hw_description.h>
 
 constexpr px4_i2c_bus_t px4_i2c_buses[I2C_BUS_MAX_BUS_ITEMS] = {
-	initI2CBusInternal(1),  // Onboard I2C: QMC5883L, SPL06-001
+	initI2CBusExternal(1),
 };

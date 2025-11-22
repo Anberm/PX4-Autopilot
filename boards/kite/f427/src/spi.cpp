@@ -37,14 +37,15 @@
 
 constexpr px4_spi_bus_t px4_spi_buses[SPI_BUS_MAX_BUS_ITEMS] = {
 	initSPIBus(SPI::Bus::SPI1, {
-		// BMI088 consists of separate accel and gyro devices on SPI1
-		initSPIDevice(DRV_ACC_DEVTYPE_BMI088, SPI::CS{GPIO::PortC, GPIO::Pin2}, SPI::DRDY{GPIO::PortD, GPIO::Pin15}),
+		// BMI088 Gyro on SPI1
 		initSPIDevice(DRV_GYR_DEVTYPE_BMI088, SPI::CS{GPIO::PortC, GPIO::Pin2}, SPI::DRDY{GPIO::PortD, GPIO::Pin15}),
-		// QMC5883L Magnetometer on SPI1
-		initSPIDevice(DRV_MAG_DEVTYPE_QMC5883L, SPI::CS{GPIO::PortE, GPIO::Pin15}, SPI::DRDY{GPIO::PortE, GPIO::Pin12}),
+		// BMI088 Accel on SPI1 (same CS and DRDY as Gyro)
+		initSPIDevice(DRV_ACC_DEVTYPE_BMI088, SPI::CS{GPIO::PortC, GPIO::Pin2}, SPI::DRDY{GPIO::PortD, GPIO::Pin15}),
 	}, {GPIO::PortE, GPIO::Pin3}),
 	initSPIBus(SPI::Bus::SPI2, {
+		// FM25V02A FRAM on SPI2
 		initSPIDevice(SPIDEV_FLASH(0), SPI::CS{GPIO::PortD, GPIO::Pin10}),
+		// SPL06-001 Barometer on SPI2
 		initSPIDevice(DRV_BARO_DEVTYPE_SPL06, SPI::CS{GPIO::PortD, GPIO::Pin7}),
 	}),
 	initSPIBusExternal(SPI::Bus::SPI4, {

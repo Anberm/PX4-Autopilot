@@ -63,10 +63,10 @@ __END_DECLS
 
 
 static uint32_t g_ledmap[] = {
-	GPIO_LED_BLUE,    // Indexed by LED_BLUE
-	GPIO_LED_RED,     // Indexed by LED_RED, LED_AMBER
-	GPIO_LED_SAFETY,  // Indexed by LED_SAFETY
-	GPIO_LED_GREEN,   // Indexed by LED_GREEN
+	GPIO_nLED_BLUE,   // Indexed by LED_BLUE
+	GPIO_nLED_RED,    // Indexed by LED_RED, LED_AMBER
+	GPIO_nLED_GREEN,  // Indexed by LED_SAFETY (Bootloader LED on PC3)
+	GPIO_nLED_GREEN,  // Indexed by LED_GREEN
 };
 
 __EXPORT void led_init(void)
@@ -79,14 +79,13 @@ __EXPORT void led_init(void)
 
 static void phy_set_led(int led, bool state)
 {
-	/* Pull Down to switch on */
-	stm32_gpiowrite(g_ledmap[led], !state);
+	/* Active high - set to turn on */
+	stm32_gpiowrite(g_ledmap[led], state);
 }
 
 static bool phy_get_led(int led)
 {
-
-	return !stm32_gpioread(g_ledmap[led]);
+	return stm32_gpioread(g_ledmap[led]);
 }
 
 __EXPORT void led_on(int led)

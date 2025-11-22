@@ -1,29 +1,16 @@
 #!/bin/sh
 #
-# Kite F427 board specific sensors initialization
-# Hardware: STM32F427VIT6
-# Actual sensors from PCB (Pick Place for IFCS-MAIN_V1.1.txt):
-#   U9:  BMI088 IMU (Accel + Gyro) - LGA-16(3x4.5)
-#   U10: QMC5883L Magnetometer - LGA-16(3x3)
-#   U11: SPL06-001 Barometer - LGA-8(2x2.5)
-#   U92: STM32F427VIT6 - LQFP-100(14x14)
-#
-# SPI bus configuration:
-#   SPI1: BMI088 (CS=PC2, DRDY=PD15), QMC5883L (CS=PE15, DRDY=PE12)
-#   SPI2: SPL06-001 (CS=PD7), FRAM (CS=PD10)
-#   SPI4: External (CS=PA8, conditional on GPIO_8266_GPIO2)
+# Kite F427 specific board sensors init
 #------------------------------------------------------------------------------
 
 board_adc start
 
-# SPL06-001 Barometer on SPI2 (Goertek high-precision barometer)
+# Internal SPI bus - SPL06-001 Barometer
 spl06 -s start
 
-# QMC5883L Magnetometer on SPI1
-# Note: Rotation parameter may need adjustment based on board orientation
-# -R 0: No rotation, -R 2: 90° yaw, -R 4: 180° yaw, -R 6: 270° yaw
-qmc5883l -s -R 0 start
+# Internal I2C bus - QMC5883L Magnetometer (I2C interface)
+qmc5883l -I start
 
-# BMI088 IMU on SPI1 (Bosch high-performance 6-axis sensor)
-# Consists of separate accel and gyro with independent or shared CS
-bmi088 -s -R 0 start
+# Internal SPI bus - BMI088 IMU (Accel and Gyro)
+bmi088 -A -s start
+bmi088 -G -s start

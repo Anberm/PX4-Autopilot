@@ -266,10 +266,7 @@
 #  define GPIO_SPI4_SCK   (GPIO_SPI4_SCK_1|GPIO_SPEED_50MHz)
 #endif
 
-/* Board provides GPIO or other Hardware for signaling to timing analyzer
- * PROBE_1-4: Timer1 PWM outputs (PE14, PE13, PE11, PE9)
- * PROBE_5-6: Timer4 PWM outputs (PD13, PD14)
- */
+/* Board provides GPIO or other Hardware for signaling to timing analyzer */
 
 #if defined(CONFIG_BOARD_USE_PROBES)
 # define PROBE_N(n) (1<<((n)-1))

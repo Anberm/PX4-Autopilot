@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# PX4 specific board extras init
+# PX4 FMUv4 specific board extras init
 #------------------------------------------------------------------------------
 
 # Run FrSky Telemetry on Pixracer on the FrSky port if not enabled already

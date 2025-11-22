@@ -1,218 +1,22 @@
 #!/bin/sh
 #
 # Kite F427 board specific defaults
-# Based on ArduPilot configuration from huakeer.params
 #------------------------------------------------------------------------------
 
-#
-# Battery / Power Monitor Configuration
-# ArduPilot VOLTAGE_SCALE=23.13
-#
+# Battery voltage divider (from ArduPilot VOLTAGE_SCALE: 23.13)
 param set-default BAT1_V_DIV 23.13
+
+# Battery current sensor (calculated from typical settings)
 param set-default BAT1_A_PER_V 36.367515152
 
-#
-# Sensor Configuration
-# Based on ArduPilot calibration data
-#
+# Frame configuration defaults
+param set-default CA_AIRFRAME 0  # Multicopter
 
-# Accelerometer offsets (ArduPilot ACC_OFFSET_*)
-# ACC_OFFSET_X=1.670471, Y=1.404297, Z=-7.025940
-param set-default CAL_ACC0_XOFF 1.67
-param set-default CAL_ACC0_YOFF 1.40
-param set-default CAL_ACC0_ZOFF -7.03
-
-# Accelerometer scale factors (ArduPilot ACC_SCALE_*)
-# ACC_SCALE_X=0.997506, Y=0.998484, Z=0.993303
-param set-default CAL_ACC0_XSCALE 0.9975
-param set-default CAL_ACC0_YSCALE 0.9985
-param set-default CAL_ACC0_ZSCALE 0.9933
-
-# Magnetometer offsets (ArduPilot MAG_OFFSET_*)
-# MAG_OFFSET_X=2016.541, Y=-1857.008, Z=1687.489
-param set-default CAL_MAG0_XOFF 2016.54
-param set-default CAL_MAG0_YOFF -1857.01
-param set-default CAL_MAG0_ZOFF 1687.49
-
-# Magnetometer scale factors (ArduPilot MAG_SCALE_*)
-# MAG_SCALE_X=0.152344, Y=0.139616, Z=0.142807
-param set-default CAL_MAG0_XSCALE 0.1523
-param set-default CAL_MAG0_YSCALE 0.1396
-param set-default CAL_MAG0_ZSCALE 0.1428
-
-#
-# Multicopter Rate Control Parameters
-# Based on ArduPilot C_RATE_* parameters
-#
-
-# Roll Rate Control (ArduPilot C_RATE_R_*)
-# KP=0.7, KI=4.0, KD=0.08, I_MAX=400
-param set-default MC_ROLLRATE_P 0.7
-param set-default MC_ROLLRATE_I 4.0
-param set-default MC_ROLLRATE_D 0.08
-param set-default MC_ROLLRATE_MAX 400
-param set-default MC_ROLLRATE_FF 0.0
-
-# Pitch Rate Control (ArduPilot C_RATE_P_*)
-param set-default MC_PITCHRATE_P 0.7
-param set-default MC_PITCHRATE_I 4.0
-param set-default MC_PITCHRATE_D 0.08
-param set-default MC_PITCHRATE_MAX 400
-param set-default MC_PITCHRATE_FF 0.0
-
-# Yaw Rate Control (ArduPilot C_RATE_Y_*)
-# KP=3.0, KI=4.0, KD=0.05, I_MAX=100
-param set-default MC_YAWRATE_P 3.0
-param set-default MC_YAWRATE_I 4.0
-param set-default MC_YAWRATE_D 0.05
-param set-default MC_YAWRATE_MAX 100
-param set-default MC_YAWRATE_FF 0.0
-
-#
-# Attitude Control (ArduPilot C_ANGLE_RP_KP=4.0)
-#
-param set-default MC_ROLL_P 4.0
-param set-default MC_PITCH_P 4.0
-
-# Max roll/pitch angle (ArduPilot MAX_RP_ANGLE=35°)
-param set-default MPC_MAN_TILT_MAX 35.0
-
-# Max yaw rate (ArduPilot MAX_YAW_RATE=70 deg/s)
-param set-default MPC_MAN_Y_MAX 70.0
-
-# Max acro rate (ArduPilot MAX_ACRO_RATE=200 deg/s)
-param set-default MC_ACRO_R_MAX 200.0
-param set-default MC_ACRO_P_MAX 200.0
-param set-default MC_ACRO_Y_MAX 200.0
-
-#
-# Position Control (ArduPilot C_POS_*)
-#
-# C_POS_XY_KP=1.0, C_POS_Z_KP=1.5
-param set-default MPC_XY_P 1.0
-param set-default MPC_Z_P 1.5
-
-#
-# Velocity Control (ArduPilot C_VEL_*)
-#
-# C_VEL_XY_KP=3.0, C_VEL_XY_FF=0.5
-param set-default MPC_XY_VEL_P_ACC 3.0
-param set-default MPC_XY_VEL_I_ACC 0.4
-param set-default MPC_XY_VEL_D_ACC 0.2
-
-# C_VEL_Z_KP=1.5, KI=2.0, KD=0.1, FF=0.3
-param set-default MPC_Z_VEL_P_ACC 1.5
-param set-default MPC_Z_VEL_I_ACC 2.0
-param set-default MPC_Z_VEL_D_ACC 0.1
-
-#
-# Velocity Limits (ArduPilot MAX_*_VEL)
-#
-# MAX_CLIMB_VEL=5.0, MAX_DOWN_VEL=3.0
-param set-default MPC_Z_VEL_MAX_UP 5.0
-param set-default MPC_Z_VEL_MAX_DN 3.0
-
-# MAX_LOITER_VEL=10.0, MAX_LOITER_ACC=3.0
-param set-default MPC_XY_VEL_MAX 10.0
-param set-default MPC_ACC_HOR_MAX 3.0
-
-# MAX_RTL_VEL=10.0 (actually not direct mapping, using manual vel max)
-param set-default MPC_XY_CRUISE 10.0
-
-#
-# Altitude and Height Limits
-#
-# MAX_HEIGHT=1000.0, MAX_RTL_HEIGHT=60.0
-param set-default GF_MAX_VER_DIST 1000.0
-param set-default RTL_RETURN_ALT 60.0
-
-#
-# Landing Configuration (ArduPilot LAND_*)
-#
-# LAND_VEL=-40 cm/s = -0.4 m/s, LAND_DELAY_S=30
-param set-default MPC_LAND_SPEED 0.4
-param set-default COM_DISARM_LAND 30.0
-
-# LAND_VOLT=10.0V
-param set-default BAT_CRIT_THR 0.15
-param set-default BAT_LOW_THR 0.25
-param set-default BAT_EMERGEN_THR 0.10
-
-#
-# Failsafe Configuration (ArduPilot FS_*)
-#
-# FS_RTL_DELAY_S=5, FS_THR_VALUE=975
-param set-default COM_RC_LOSS_T 5.0
-param set-default COM_RCL_EXCEPT 4
-
-#
-# Motor Configuration (ArduPilot C_MOTOR_IDLE=100)
-#
-param set-default PWM_MIN 1000
-param set-default PWM_MAX 2000
-param set-default PWM_DISARMED 900
-param set-default PWM_RATE 400
-
-# Motor idle throttle
-param set-default MPC_MANTHR_MIN 0.05
-param set-default MPC_THR_HOVER 0.5
-
-#
-# RC Input Configuration
-#
-# RC channel mapping from ArduPilot RCMAP_*
-# ROLL=1, PITCH=2, THROTTLE=3, YAW=4
+# RC input configuration
 param set-default RC_MAP_ROLL 1
 param set-default RC_MAP_PITCH 2
 param set-default RC_MAP_THROTTLE 3
 param set-default RC_MAP_YAW 4
 
-# RC deadzone (ArduPilot RC*_DZ=20)
-param set-default COM_RC_IN_MODE 1
-
-#
-# Frame Configuration
-#
-# FRAME_CLASS=1 (Quad), FRAME_TYPE=1 (X)
-param set-default CA_AIRFRAME 0
-param set-default CA_ROTOR_COUNT 4
-
-#
-# Filter Configuration (ArduPilot LPF_*)
-#
-# LPF_GYRO=15 Hz, LPF_ACC=10 Hz
-param set-default IMU_GYRO_CUTOFF 15.0
-param set-default IMU_ACCEL_CUTOFF 10.0
-
-# LPF_RC_RP=4 Hz, LPF_RC_THR=1.5 Hz, LPF_RC_YAW=1.5 Hz
-param set-default RC_FLT_CUTOFF 4.0
-
-#
-# EKF2 Configuration
-#
-param set-default EKF2_AID_MASK 1
-param set-default EKF2_HGT_MODE 0
-
-#
-# GPS Configuration (ArduPilot INAV_GPS_MS=120)
-#
-param set-default EKF2_GPS_DELAY 120
-
-#
-# Attitude Compensation (ArduPilot C_ATT_COMP=0.5)
-#
-param set-default MC_PITCHRATE_K 1.0
-param set-default MC_ROLLRATE_K 1.0
-
-#
-# Geofence (ArduPilot C_FENCE_RADIUS=1000m)
-#
-param set-default GF_MAX_HOR_DIST 1000.0
-param set-default GF_ACTION 2
-
-#
-# Collision Avoidance (ArduPilot AVOID_DIST=2.0m)
-#
-param set-default CP_DIST 2.0
-
+# Safety button
 safety_button start

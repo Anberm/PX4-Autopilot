@@ -34,9 +34,7 @@
 /**
  * @file board_config.h
  *
- * Kite F427 internal definitions
- * Hardware: STM32F427VIT6
- * Based on FMUv4 with customizations for Kite hardware
+ * PX4FMUv4 internal definitions
  */
 
 #pragma once
@@ -54,15 +52,16 @@
  ****************************************************************************************************/
 /* Configuration ************************************************************************************/
 
-/* Kite F427 GPIOs ***********************************************************************************/
+/* PX4FMU GPIOs ***********************************************************************************/
 /* LEDs */
-#define GPIO_LED1                    (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN11)
-#define GPIO_LED2                    (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
-#define GPIO_LED3                    (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN3)
+/* LED Activity on PA2 (GPIO2), LED Bootloader on PC3 (GPIO3) */
+#define GPIO_nLED_RED                (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN2)
+#define GPIO_nLED_GREEN              (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN3)
+#define GPIO_nLED_BLUE               (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN3)
 
-#define GPIO_LED_RED                 GPIO_LED1
-#define GPIO_LED_GREEN               GPIO_LED2
-#define GPIO_LED_BLUE                GPIO_LED3
+#define GPIO_LED_RED                 GPIO_nLED_RED
+#define GPIO_LED_GREEN               GPIO_nLED_GREEN
+#define GPIO_LED_BLUE                GPIO_nLED_BLUE
 
 #define BOARD_HAS_CONTROL_STATUS_LEDS 1
 #define BOARD_OVERLOAD_LED     LED_RED
@@ -80,10 +79,10 @@
 #define ADC_CHANNELS (1 << 2) | (1 << 3) | (1 << 4) | (1 << 10) | (1 << 11) | (1 << 12) | (1 << 13) | (1 << 14)
 
 /* ADC defines to be used in sensors.cpp to read from a particular channel. */
-#define ADC_BATTERY_VOLTAGE_CHANNEL  2  /* PA2 - Battery voltage */
-#define ADC_BATTERY_CURRENT_CHANNEL  3  /* PA3 - Battery current */
-#define ADC_5V_RAIL_SENSE            4  /* PA4 - 5V rail sense */
-#define ADC_RC_RSSI_CHANNEL          11 /* PC1 - RC RSSI */
+#define ADC_BATTERY_VOLTAGE_CHANNEL  2
+#define ADC_BATTERY_CURRENT_CHANNEL  3
+#define ADC_5V_RAIL_SENSE            4
+#define ADC_RC_RSSI_CHANNEL          11
 
 /* Power supply control and monitoring GPIOs. */
 #define GPIO_VDD_BRICK_VALID         (GPIO_INPUT|GPIO_PULLUP|GPIO_PORTB|GPIO_PIN5)
@@ -125,7 +124,7 @@
 #define GPIO_PWM_IN                  GPIO_TIM4_CH2IN_2
 
 #define GPIO_RSSI_IN                 (GPIO_INPUT|GPIO_PULLUP|GPIO_PORTC|GPIO_PIN1)
-#define GPIO_LED_SAFETY              (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN3)
+/* Safety button and LED - PC3 is used for LED, moved safety to PC4 */
 #define GPIO_BTN_SAFETY              (GPIO_INPUT|GPIO_PULLUP|GPIO_PORTC|GPIO_PIN4)
 #define GPIO_PERIPH_3V3_EN           (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN5)
 
@@ -150,12 +149,12 @@
 #define SPEKTRUM_POWER(_on_true)     px4_arch_gpiowrite(GPIO_SPEKTRUM_PWR_EN, (!_on_true))
 
 /**
- * FMUv4-based RC_IN implementation for Kite F427
+ * FMUv4 has separate RC_IN
  *
- * GPIO PPM_IN on PB0 (Timer3_CH3)
- * SPEKTRUM_RX on UART6 (PC6/PC7)
+ * GPIO PPM_IN on PB0 T3C3
+ * SPEKTRUM_RX (it's TX or RX in Bind) on UART6 PC7
  * Inversion is possible via the 74LVC2G86 controlled by the FMU
- * The FMU can drive GPIO PPM_IN as an output
+ * The FMU can drive  GPIO PPM_IN as an output
  */
 
 #define GPIO_PPM_IN_AS_OUT           (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN0)
@@ -202,7 +201,7 @@ __BEGIN_DECLS
  * Name: stm32_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Kite F427 board.
+ *   Called to configure SPI chip select GPIO pins for the PX4FMU board.
  *
  ****************************************************************************************************/
 

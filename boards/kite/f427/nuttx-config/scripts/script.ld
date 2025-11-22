@@ -45,8 +45,7 @@
  * where the code expects to begin execution by jumping to the entry point in
  * the 0x0800:0000 address range.
  *
- * The first 0x4000 (16KB) of flash is reserved for the bootloader.
- * Application firmware runs from 0x0800:4000 to 0x0800:0000 + 2032KB.
+ * The first 0x4000 of flash is reserved for the bootloader.
  */
 
 MEMORY
