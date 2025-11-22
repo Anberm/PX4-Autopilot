@@ -37,9 +37,9 @@
 
 constexpr px4_spi_bus_t px4_spi_buses[SPI_BUS_MAX_BUS_ITEMS] = {
 	initSPIBus(SPI::Bus::SPI1, {
-		// BMI088 consists of separate accel and gyro devices
-		// They may have different CS pins or share the same CS
-		initSPIDevice(DRV_IMU_DEVTYPE_BMI088, SPI::CS{GPIO::PortC, GPIO::Pin2}, SPI::DRDY{GPIO::PortD, GPIO::Pin15}),
+		// BMI088 consists of separate accel and gyro devices on SPI1
+		initSPIDevice(DRV_ACC_DEVTYPE_BMI088, SPI::CS{GPIO::PortC, GPIO::Pin2}, SPI::DRDY{GPIO::PortD, GPIO::Pin15}),
+		initSPIDevice(DRV_GYR_DEVTYPE_BMI088, SPI::CS{GPIO::PortC, GPIO::Pin2}, SPI::DRDY{GPIO::PortD, GPIO::Pin15}),
 		// QMC5883L Magnetometer on SPI1
 		initSPIDevice(DRV_MAG_DEVTYPE_QMC5883L, SPI::CS{GPIO::PortE, GPIO::Pin15}, SPI::DRDY{GPIO::PortE, GPIO::Pin12}),
 	}, {GPIO::PortE, GPIO::Pin3}),
