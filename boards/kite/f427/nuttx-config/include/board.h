@@ -54,7 +54,7 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* The MINDPX uses a 8MHz crystal connected to the HSE.
+/* The PX4FMUV4 uses a 24MHz crystal connected to the HSE.
  *
  * This is the "standard" configuration as set up by arch/arm/src/stm32f40xx_rcc.c:
  *   System Clock source           : PLL (HSE)
@@ -63,8 +63,8 @@
  *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
  *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
  *   APB2 Prescaler                : 2            (STM32_RCC_CFGR_PPRE2)
- *   HSE Frequency(Hz)             : 8000000     (STM32_BOARD_XTAL)
- *   PLLM                          : 8           (STM32_PLLCFG_PLLM)
+ *   HSE Frequency(Hz)             : 24000000     (STM32_BOARD_XTAL)
+ *   PLLM                          : 24           (STM32_PLLCFG_PLLM)
  *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
  *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
  *   PLLQ                          : 7            (STM32_PLLCFG_PPQ)
@@ -79,11 +79,11 @@
 
 /* HSI - 16 MHz RC factory-trimmed
  * LSI - 32 KHz RC
- * HSE - On-board crystal frequency is 8MHz
+ * HSE - On-board crystal frequency is 24MHz
  * LSE - not installed
  */
 
-#define STM32_BOARD_XTAL        8000000ul
+#define STM32_BOARD_XTAL        24000000ul
 
 #define STM32_HSI_FREQUENCY     16000000ul
 #define STM32_LSI_FREQUENCY     32000
@@ -94,7 +94,7 @@
  *
  * PLL source is HSE
  * PLL_VCO = (STM32_HSE_FREQUENCY / PLLM) * PLLN
- *         = (8,000,000 / 8) * 336
+ *         = (25,000,000 / 25) * 336
  *         = 336,000,000
  * SYSCLK  = PLL_VCO / PLLP
  *         = 336,000,000 / 2 = 168,000,000
@@ -103,15 +103,12 @@
  *         = 48,000,000
  */
 
-#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(8)
+#define STM32_PLLCFG_PLLM       RCC_PLLCFG_PLLM(24)
 #define STM32_PLLCFG_PLLN       RCC_PLLCFG_PLLN(336)
 #define STM32_PLLCFG_PLLP       RCC_PLLCFG_PLLP_2
 #define STM32_PLLCFG_PLLQ       RCC_PLLCFG_PLLQ(7)
 
 #define STM32_SYSCLK_FREQUENCY  168000000ul
-
-/* CPU Clock is same as SYSCLK for STM32F427 */
-#define STM32_CPUCLK_FREQUENCY  STM32_SYSCLK_FREQUENCY
 
 /* AHB clock (HCLK) is SYSCLK (168MHz) */
 
@@ -204,7 +201,7 @@
 /*
  * UARTs.
  */
-#define GPIO_USART1_RX	GPIO_USART1_RX_2	/* RC_INPUT */
+#define GPIO_USART1_RX	GPIO_USART1_RX_2	/* ESP8266 */
 #define GPIO_USART1_TX	GPIO_USART1_TX_2
 
 #define GPIO_USART2_RX	GPIO_USART2_RX_2
@@ -214,28 +211,20 @@
 
 #define GPIO_USART3_RX	GPIO_USART3_RX_3
 #define GPIO_USART3_TX	GPIO_USART3_TX_3
-#define GPIO_USART3_CTS	0 // unused
-#define GPIO_USART3_RTS	0 // unused
+#define GPIO_USART3_RTS	GPIO_USART3_RTS_2
+#define GPIO_USART3_CTS	GPIO_USART3_CTS_2
 
 #define GPIO_UART4_RX	GPIO_UART4_RX_1
 #define GPIO_UART4_TX	GPIO_UART4_TX_1
 
-#define GPIO_USART6_RX	GPIO_USART6_RX_2
-#define GPIO_USART6_TX	GPIO_USART6_TX_2
+#define GPIO_USART6_RX	GPIO_USART6_RX_1	/* RC_INPUT */
+#define GPIO_USART6_TX	GPIO_USART6_TX_1
 
 #define GPIO_UART7_RX	GPIO_UART7_RX_1
 #define GPIO_UART7_TX	GPIO_UART7_TX_1
 
-#define GPIO_UART8_RX	GPIO_UART8_RX_0   /* UART8 on PE0 */
-#define GPIO_UART8_TX	GPIO_UART8_TX_0   /* UART8 on PE1 */
+/* UART8 has no alternate pin config */
 
-/* Define GPIO_UART8_RX_0 and GPIO_UART8_TX_0 directly if not defined by pinmap */
-#ifndef GPIO_UART8_RX_0
-#  define GPIO_UART8_RX_0 (GPIO_ALT|GPIO_AF8|GPIO_PULLUP|GPIO_PUSHPULL|GPIO_PORTE|GPIO_PIN0)
-#endif
-#ifndef GPIO_UART8_TX_0
-#  define GPIO_UART8_TX_0 (GPIO_ALT|GPIO_AF8|GPIO_PULLUP|GPIO_PUSHPULL|GPIO_PORTE|GPIO_PIN1)
-#endif
 
 /*
  * CAN
@@ -257,27 +246,54 @@
 #define GPIO_I2C1_SCL_GPIO	(GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN8)
 #define GPIO_I2C1_SDA_GPIO	(GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN9)
 
-#define GPIO_I2C2_SCL		GPIO_I2C2_SCL_1
-#define GPIO_I2C2_SDA		GPIO_I2C2_SDA_1
-#define GPIO_I2C2_SCL_GPIO	(GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN10)
-#define GPIO_I2C2_SDA_GPIO	(GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN11)
 
 /*
  * SPI
  *
  * There are sensors on SPI1, and SPI2 is connected to the FRAM.
  */
-#define GPIO_SPI1_MISO	(GPIO_SPI1_MISO_1|GPIO_SPEED_50MHz)
-#define GPIO_SPI1_MOSI	(GPIO_SPI1_MOSI_2|GPIO_SPEED_50MHz)
-#define GPIO_SPI1_SCK	(GPIO_SPI1_SCK_1|GPIO_SPEED_50MHz)
+#define GPIO_SPI1_MISO  (GPIO_SPI1_MISO_1|GPIO_SPEED_50MHz)
+#define GPIO_SPI1_MOSI  (GPIO_SPI1_MOSI_1|GPIO_SPEED_50MHz)
+#define GPIO_SPI1_SCK   (GPIO_SPI1_SCK_1|GPIO_SPEED_50MHz)
 
-#define GPIO_SPI2_MISO	(GPIO_SPI2_MISO_1|GPIO_SPEED_50MHz)
-#define GPIO_SPI2_MOSI	(GPIO_SPI2_MOSI_1|GPIO_SPEED_50MHz)
-#define GPIO_SPI2_SCK	(GPIO_SPI2_SCK_2|GPIO_SPEED_50MHz)
+#define GPIO_SPI2_MISO  (GPIO_SPI2_MISO_1|GPIO_SPEED_50MHz)
+#define GPIO_SPI2_MOSI  (GPIO_SPI2_MOSI_1|GPIO_SPEED_50MHz)
+#define GPIO_SPI2_SCK   (GPIO_SPI2_SCK_1|GPIO_SPEED_50MHz)
 
-#define GPIO_SPI4_MISO	(GPIO_SPI4_MISO_1|GPIO_SPEED_50MHz)
-#define GPIO_SPI4_MOSI	(GPIO_SPI4_MOSI_1|GPIO_SPEED_50MHz)
-#define GPIO_SPI4_SCK	(GPIO_SPI4_SCK_1|GPIO_SPEED_50MHz)
+#if defined(CONFIG_STM32_SPI4)
+#  define GPIO_SPI4_MISO  (GPIO_SPI4_MISO_1|GPIO_SPEED_50MHz)
+#  define GPIO_SPI4_MOSI  (GPIO_SPI4_MOSI_1|GPIO_SPEED_50MHz)
+#  define GPIO_SPI4_SCK   (GPIO_SPI4_SCK_1|GPIO_SPEED_50MHz)
+#endif
+
+/* Board provides GPIO or other Hardware for signaling to timing analyzer */
+
+#if defined(CONFIG_BOARD_USE_PROBES)
+# define PROBE_N(n) (1<<((n)-1))
+# define PROBE_1  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN14)
+# define PROBE_2  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN13)
+# define PROBE_3  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN11)
+# define PROBE_4  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN9)
+# define PROBE_5  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTD|GPIO_PIN13)
+# define PROBE_6  (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTD|GPIO_PIN14)
+
+# define PROBE_INIT(mask) \
+	do { \
+		if ((mask)& PROBE_N(1)) { stm32_configgpio(PROBE_1); } \
+		if ((mask)& PROBE_N(2)) { stm32_configgpio(PROBE_2); } \
+		if ((mask)& PROBE_N(3)) { stm32_configgpio(PROBE_3); } \
+		if ((mask)& PROBE_N(4)) { stm32_configgpio(PROBE_4); } \
+		if ((mask)& PROBE_N(5)) { stm32_configgpio(PROBE_5); } \
+		if ((mask)& PROBE_N(6)) { stm32_configgpio(PROBE_6); } \
+	} while(0)
+
+# define PROBE(n,s)  do {stm32_gpiowrite(PROBE_##n,(s));}while(0)
+# define PROBE_MARK(n) PROBE(n,false);PROBE(n,true)
+#else
+# define PROBE_INIT(mask)
+# define PROBE(n,s)
+# define PROBE_MARK(n)
+#endif
 
 
 #endif  /* __ARCH_BOARD_BOARD_H */

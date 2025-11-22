@@ -1,7 +1,4 @@
-# UAVCAN board identity for KiteF427v1
-# board_id = 2021 => HW_MAJOR = 7, HW_MINOR = 229
-# Calculation: (7 << 8) + 229 = 1792 + 229 = 2021
-
+# UAVCAN boot loadable Module ID
 set(uavcanblid_sw_version_major ${PX4_VERSION_MAJOR})
 set(uavcanblid_sw_version_minor ${PX4_VERSION_MINOR})
 add_definitions(
@@ -9,10 +6,9 @@ add_definitions(
 	-DAPP_VERSION_MINOR=${uavcanblid_sw_version_minor}
 )
 
-# Hardware version from BOM: KiteF427v1 with STM32F427, BMI088, QMC5883L, SPL06-001
-set(uavcanblid_hw_version_major 7)
-set(uavcanblid_hw_version_minor 229)
-set(uavcanblid_name "\"org.kite.f427-v1\"")
+set(uavcanblid_hw_version_major 1)
+set(uavcanblid_hw_version_minor 0)
+set(uavcanblid_name "\"org.kite.f427\"")
 
 add_definitions(
 	-DHW_UAVCAN_NAME=${uavcanblid_name}

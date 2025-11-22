@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2015, 2016 Airmind Development Team. All rights reserved.
+ *   Copyright (c) 2013 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -12,7 +12,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name Airmind nor the names of its contributors may be
+ * 3. Neither the name PX4 nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -60,37 +60,46 @@ extern void led_off(int led);
 extern void led_toggle(int led);
 __END_DECLS
 
-__EXPORT void led_init()
-{
-	/* Configure LED1 GPIO for output */
 
-	stm32_configgpio(GPIO_LED1);
+
+static uint32_t g_ledmap[] = {
+	GPIO_nLED_BLUE,   // Indexed by LED_BLUE
+	GPIO_nLED_RED,    // Indexed by LED_RED, LED_AMBER
+	GPIO_nLED_GREEN,  // Indexed by LED_SAFETY (Bootloader LED on PC3)
+	GPIO_nLED_GREEN,  // Indexed by LED_GREEN
+};
+
+__EXPORT void led_init(void)
+{
+	/* Configure LED GPIOs for output */
+	for (size_t l = 0; l < (sizeof(g_ledmap) / sizeof(g_ledmap[0])); l++) {
+		stm32_configgpio(g_ledmap[l]);
+	}
+}
+
+static void phy_set_led(int led, bool state)
+{
+	/* Active high - set to turn on */
+	stm32_gpiowrite(g_ledmap[led], state);
+}
+
+static bool phy_get_led(int led)
+{
+	return stm32_gpioread(g_ledmap[led]);
 }
 
 __EXPORT void led_on(int led)
 {
-	if (led == 1) {
-		/* Pull down to switch on */
-		stm32_gpiowrite(GPIO_LED1, false);
-	}
+	phy_set_led(led, true);
 }
 
 __EXPORT void led_off(int led)
 {
-	if (led == 1) {
-		/* Pull up to switch off */
-		stm32_gpiowrite(GPIO_LED1, true);
-	}
+	phy_set_led(led, false);
 }
 
 __EXPORT void led_toggle(int led)
 {
-	if (led == 1) {
-		if (stm32_gpioread(GPIO_LED1)) {
-			stm32_gpiowrite(GPIO_LED1, false);
 
-		} else {
-			stm32_gpiowrite(GPIO_LED1, true);
-		}
-	}
+	phy_set_led(led, !phy_get_led(led));
 }
