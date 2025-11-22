@@ -31,13 +31,4 @@
 #
 ############################################################################
 
-px4_add_library(arch_bootloader
-	main.c
-	systick.c
-)
-
-target_link_libraries(arch_bootloader
-	PRIVATE
-		bootloader_lib
-		nuttx_arch
-)
+add_subdirectory(../stm32_common arch_bootloader)
