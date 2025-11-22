@@ -34,8 +34,11 @@
 /**
  * @file init.c
  *
- * PX4FMU-specific early startup code.  This file implements the
+ * Kite F427 specific early startup code. This file implements the
  * board_app_initialize() function that is called early by nsh during startup.
+ * 
+ * Hardware: STM32F427VIT6 based flight controller
+ * Based on FMUv4 with Kite-specific modifications
  *
  * Code here is run before the rcS script is invoked; it should start required
  * subsystems and perform board-specific initialization.

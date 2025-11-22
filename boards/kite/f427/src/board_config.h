@@ -34,7 +34,9 @@
 /**
  * @file board_config.h
  *
- * PX4FMUv4 internal definitions
+ * Kite F427 internal definitions
+ * Hardware: STM32F427VIT6
+ * Based on FMUv4 with customizations for Kite hardware
  */
 
 #pragma once
@@ -52,7 +54,7 @@
  ****************************************************************************************************/
 /* Configuration ************************************************************************************/
 
-/* PX4FMU GPIOs ***********************************************************************************/
+/* Kite F427 GPIOs ***********************************************************************************/
 /* LEDs */
 #define GPIO_LED1                    (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN11)
 #define GPIO_LED2                    (GPIO_OUTPUT|GPIO_OPENDRAIN|GPIO_SPEED_50MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
@@ -78,10 +80,10 @@
 #define ADC_CHANNELS (1 << 2) | (1 << 3) | (1 << 4) | (1 << 10) | (1 << 11) | (1 << 12) | (1 << 13) | (1 << 14)
 
 /* ADC defines to be used in sensors.cpp to read from a particular channel. */
-#define ADC_BATTERY_VOLTAGE_CHANNEL  2
-#define ADC_BATTERY_CURRENT_CHANNEL  3
-#define ADC_5V_RAIL_SENSE            4
-#define ADC_RC_RSSI_CHANNEL          11
+#define ADC_BATTERY_VOLTAGE_CHANNEL  2  /* PA2 - Battery voltage */
+#define ADC_BATTERY_CURRENT_CHANNEL  3  /* PA3 - Battery current */
+#define ADC_5V_RAIL_SENSE            4  /* PA4 - 5V rail sense */
+#define ADC_RC_RSSI_CHANNEL          11 /* PC1 - RC RSSI */
 
 /* Power supply control and monitoring GPIOs. */
 #define GPIO_VDD_BRICK_VALID         (GPIO_INPUT|GPIO_PULLUP|GPIO_PORTB|GPIO_PIN5)
@@ -148,12 +150,12 @@
 #define SPEKTRUM_POWER(_on_true)     px4_arch_gpiowrite(GPIO_SPEKTRUM_PWR_EN, (!_on_true))
 
 /**
- * FMUv4 has separate RC_IN
+ * FMUv4-based RC_IN implementation for Kite F427
  *
- * GPIO PPM_IN on PB0 T3C3
- * SPEKTRUM_RX (it's TX or RX in Bind) on UART6 PC7
+ * GPIO PPM_IN on PB0 (Timer3_CH3)
+ * SPEKTRUM_RX on UART6 (PC6/PC7)
  * Inversion is possible via the 74LVC2G86 controlled by the FMU
- * The FMU can drive  GPIO PPM_IN as an output
+ * The FMU can drive GPIO PPM_IN as an output
  */
 
 #define GPIO_PPM_IN_AS_OUT           (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN0)
@@ -200,7 +202,7 @@ __BEGIN_DECLS
  * Name: stm32_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the PX4FMU board.
+ *   Called to configure SPI chip select GPIO pins for the Kite F427 board.
  *
  ****************************************************************************************************/
 

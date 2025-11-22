@@ -1,36 +1,29 @@
 #!/bin/sh
 #
-# PX4 FMUv4 specific board sensors init
+# Kite F427 board specific sensors initialization
+# Hardware: STM32F427VIT6
+# Actual sensors from PCB (Pick Place for IFCS-MAIN_V1.1.txt):
+#   U9:  BMI088 IMU (Accel + Gyro) - LGA-16(3x4.5)
+#   U10: QMC5883L Magnetometer - LGA-16(3x3)
+#   U11: SPL06-001 Barometer - LGA-8(2x2.5)
+#   U92: STM32F427VIT6 - LQFP-100(14x14)
+#
+# SPI bus configuration:
+#   SPI1: BMI088 (CS=PC2, DRDY=PD15), QMC5883L (CS=PE15, DRDY=PE12)
+#   SPI2: SPL06-001 (CS=PD7), FRAM (CS=PD10)
+#   SPI4: External (CS=PA8, conditional on GPIO_8266_GPIO2)
 #------------------------------------------------------------------------------
 
 board_adc start
 
-# Internal SPI
-ms5611 -s start
+# SPL06-001 Barometer on SPI2 (Goertek high-precision barometer)
+spl06 -s start
 
-# hmc5883 internal SPI bus is rotated 90 deg yaw
-if ! hmc5883 -T -s -R 2 -q start
-then
-	# lis3mdl internal SPI bus is rotated 90 deg yaw
-	lis3mdl -s start
-fi
+# QMC5883L Magnetometer on SPI1
+# Note: Rotation parameter may need adjustment based on board orientation
+# -R 0: No rotation, -R 2: 90° yaw, -R 4: 180° yaw, -R 6: 270° yaw
+qmc5883l -s -R 0 start
 
-# Start either ICM2060X. They are both connected to the same SPI bus and use the same
-# chip select pin. There are different boards with either one of them and the WHO_AM_I register
-# will prevent the incorrect driver from a successful initialization.
-
-# ICM20602 internal SPI bus ICM-20608-G
-if ! icm20602 -s -R 8 start
-then
-	# ICM20608 internal SPI bus ICM-20602-G
-	icm20608g -s -R 8 start
-fi
-
-# For Teal One airframe
-if param compare SYS_AUTOSTART 4250
-then
-	mpu6500 -s -R 0 start
-else
-	# mpu9250 internal SPI bus mpu9250
-	mpu9250 -s -R 8 -M start
-fi
+# BMI088 IMU on SPI1 (Bosch high-performance 6-axis sensor)
+# Consists of separate accel and gyro with independent or shared CS
+bmi088 -s -R 0 start

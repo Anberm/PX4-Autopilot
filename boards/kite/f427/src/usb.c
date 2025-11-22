@@ -34,7 +34,8 @@
 /**
  * @file usb.c
  *
- * Board-specific USB functions.
+ * Board-specific USB functions for Kite F427.
+ * Hardware: STM32F427VIT6 with USB OTG FS
  */
 
 /************************************************************************************
@@ -71,7 +72,8 @@
  * Name: stm32_usbinitialize
  *
  * Description:
- *   Called to setup USB-related GPIO pins for the PX4FMU board.
+ *   Called to setup USB-related GPIO pins for the Kite F427 board.
+ *   Configures PA9 for VBUS sensing (USB OTG FS).
  *
  ************************************************************************************/
 
