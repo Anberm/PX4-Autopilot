@@ -1,43 +1,134 @@
-#include <stdint.h>
-#include <string.h>
-#include <stdbool.h>
-#include "board_config.h"
-#include "hw_config.h"
-#include "bl.h"
-#include <nvic.h>
-#include <lib/systick.h>
-#include <stm32_gpio.h>
+/*
+ * STM32F4 board support for the bootloader.
+ *
+ */
 
-/* Define MCU identification masks for STM32F4 */
-#define DEVID_MASK  0x0fff
-#define REVID_MASK  0xffff0000
-#define STM32_UNKNOWN 0
+#include <px4_platform_common/px4_config.h>
+#include <px4_defines.h>
+
+#include "hw_config.h"
+
+#include <stm32_pwr.h>
+#include <stm32_rtc.h>
+#include <stm32_rcc.h>
+#include <nvic.h>
+#include <nuttx/progmem.h>
+#include <lib/systick.h>
+#include <lib/flash_cache.h>
+
+#include "bl.h"
+#include "uart.h"
+
+/* magic numbers from reference manual */
+#define STM32_UNKNOWN	0
+#define STM32F40x_41x	0x413
+#define STM32F42x_43x	0x419
+#define STM32F42x_446xx	0x421
+
+#define REVID_MASK	0xFFFF0000
+#define DEVID_MASK	0xFFF
+
+typedef enum mcu_rev_e {
+	MCU_REV_STM32F4_REV_A = 0x1000,
+	MCU_REV_STM32F4_REV_Z = 0x1001,
+	MCU_REV_STM32F4_REV_Y = 0x1003,
+	MCU_REV_STM32F4_REV_1 = 0x1007,
+	MCU_REV_STM32F4_REV_3 = 0x2001
+} mcu_rev_e;
+
+typedef struct mcu_des_t {
+	uint16_t mcuid;
+	const char *desc;
+	char  rev;
+} mcu_des_t;
+
+mcu_des_t mcu_descriptions[] = {
+	{ STM32_UNKNOWN,	"STM32F???",    '?'},
+	{ STM32F40x_41x, 	"STM32F40x",	'?'},
+	{ STM32F42x_43x, 	"STM32F42x",	'?'},
+	{ STM32F42x_446xx, 	"STM32F446XX",	'?'},
+};
+
+typedef struct mcu_rev_t {
+	mcu_rev_e revid;
+	char  rev;
+} mcu_rev_t;
+
+const mcu_rev_t silicon_revs[] = {
+	{MCU_REV_STM32F4_REV_3, '3'}, /* Revision 3 */
+	{MCU_REV_STM32F4_REV_A, 'A'}, /* Revision A */
+	{MCU_REV_STM32F4_REV_Z, 'Z'}, /* Revision Z */
+	{MCU_REV_STM32F4_REV_Y, 'Y'}, /* Revision Y */
+	{MCU_REV_STM32F4_REV_1, '1'}, /* Revision 1 */
+};
+
+#define FIRST_BAD_SILICON_OFFSET 1
+
+/*
+ * If APP_RESERVATION_SIZE is greater than 0 and
+ * FLASH_BASED_PARAMS is defined, throw a compile error
+ */
+#if defined(FLASH_BASED_PARAMS) && (APP_RESERVATION_SIZE <= 0)
+# error "APP_RESERVATION_SIZE must be greater than 0 if FLASH_BASED_PARAMS is defined"
+#endif
+
+#define APP_SIZE_MAX			(BOARD_FLASH_SIZE - (BOOTLOADER_RESERVATION_SIZE + APP_RESERVATION_SIZE))
+
+
+/* context passed to cinit */
+#if INTERFACE_USART
+# define BOARD_INTERFACE_CONFIG_USART	INTERFACE_USART_CONFIG
+#endif
+#if INTERFACE_USB
+# define BOARD_INTERFACE_CONFIG_USB  INTERFACE_USB_CONFIG
+#endif
+
+/* board definition */
+struct boardinfo board_info = {
+	.board_type	= BOARD_TYPE,
+	.board_rev	= 0,
+	.fw_size	= 0,
+	.systick_mhz	= STM32_SYSCLK_FREQUENCY / 1000000,
+};
 
 static void board_init(void);
 
 #define BOOT_RTC_SIGNATURE          0xb007b007
 #define BOOT_RTC_REG                MMIO32(RTC_BASE + 0x50)
 
+/* State of an inserted USB cable */
 static bool usb_connected = false;
 
 static uint32_t board_get_rtc_signature(void)
 {
+	/* enable the backup registers */
 	stm32_pwr_initbkp(true);
+
 	uint32_t result = getreg32(STM32_RTC_BK0R);
+
+	/* disable the backup registers */
 	stm32_pwr_initbkp(false);
+
 	return result;
 }
 
-static void board_set_rtc_signature(uint32_t sig)
+static void
+board_set_rtc_signature(uint32_t sig)
 {
+	/* enable the backup registers */
 	stm32_pwr_initbkp(true);
+
 	putreg32(sig, STM32_RTC_BK0R);
+
+	/* disable the backup registers */
 	stm32_pwr_initbkp(false);
+
 }
 
 static bool board_test_force_pin(void)
 {
 #if defined(BOARD_FORCE_BL_PIN_IN) && defined(BOARD_FORCE_BL_PIN_OUT)
+	/* two pins strapped together */
 	volatile unsigned samples = 0;
 	volatile unsigned vote = 0;
 
@@ -48,6 +139,7 @@ static bool board_test_force_pin(void)
 			if (px4_arch_gpioread(BOARD_FORCE_BL_PIN_IN) != 0) {
 				vote++;
 			}
+
 			samples++;
 		}
 
@@ -57,16 +149,19 @@ static bool board_test_force_pin(void)
 			if (px4_arch_gpioread(BOARD_FORCE_BL_PIN_IN) == 0) {
 				vote++;
 			}
+
 			samples++;
 		}
 	}
 
+	/* the idea here is to reject wire-to-wire coupling, so require > 90% agreement */
 	if ((vote * 100) > (samples * 90)) {
 		return true;
 	}
 
 #endif
 #if defined(BOARD_FORCE_BL_PIN)
+	/* single pin pulled up or down */
 	volatile unsigned samples = 0;
 	volatile unsigned vote = 0;
 
@@ -76,6 +171,7 @@ static bool board_test_force_pin(void)
 		}
 	}
 
+	/* reject a little noise */
 	if ((vote * 100) > (samples * 90)) {
 		return true;
 	}
@@ -84,7 +180,72 @@ static bool board_test_force_pin(void)
 	return false;
 }
 
-uint32_t board_get_devices(void)
+#if INTERFACE_USART
+static bool board_test_usart_receiving_break(void)
+{
+#if !defined(SERIAL_BREAK_DETECT_DISABLED)
+	/* (re)start the SysTick timer system */
+	systick_interrupt_disable(); // Kill the interrupt if it is still active
+	systick_counter_disable(); // Stop the timer
+	systick_set_clocksource(CLKSOURCE_PROCESOR);
+
+	/* Set the timer period to be half the bit rate
+	 *
+	 * Baud rate = 115200, therefore bit period = 8.68us
+	 * Half the bit rate = 4.34us
+	 * Set period to 4.34 microseconds (timer_period = timer_tick / timer_reset_frequency = 168MHz / (1/4.34us) = 729.12 ~= 729)
+	 */
+	systick_set_reload(729);  /* 4.3us tick, magic number */
+	systick_counter_enable(); // Start the timer
+
+	uint8_t cnt_consecutive_low = 0;
+	uint8_t cnt = 0;
+
+	/* Loop for 3 transmission byte cycles and count the low and high bits. Sampled at a rate to be able to count each bit twice.
+	 *
+	 * One transmission byte is 10 bits (8 bytes of data + 1 start bit + 1 stop bit)
+	 * We sample at every half bit time, therefore 20 samples per transmission byte,
+	 * therefore 60 samples for 3 transmission bytes
+	 */
+	while (cnt < 60) {
+		// Only read pin when SysTick timer is true
+		if (systick_get_countflag() == 1) {
+			if (gpio_get(BOARD_PORT_USART_RX, BOARD_PIN_RX) == 0) {
+				cnt_consecutive_low++;	// Increment the consecutive low counter
+
+			} else {
+				cnt_consecutive_low = 0; // Reset the consecutive low counter
+			}
+
+			cnt++;
+		}
+
+		// If 9 consecutive low bits were received break out of the loop
+		if (cnt_consecutive_low >= 18) {
+			break;
+		}
+
+	}
+
+	systick_counter_disable(); // Stop the timer
+
+	/*
+	 * If a break is detected, return true, else false
+	 *
+	 * Break is detected if line was low for 9 consecutive bits.
+	 */
+	if (cnt_consecutive_low >= 18) {
+		return true;
+	}
+
+#endif // !defined(SERIAL_BREAK_DETECT_DISABLED)
+
+	return false;
+}
+#endif
+
+uint32_t
+board_get_devices(void)
 {
 	uint32_t devices = BOOT_DEVICES_SELECTION;
 
@@ -95,66 +256,97 @@ uint32_t board_get_devices(void)
 	return devices;
 }
 
-static void board_init(void)
+static void
+board_init(void)
 {
+	/* fix up the max firmware size, we have to read memory to get this */
 	board_info.fw_size = APP_SIZE_MAX;
 
 #if defined(BOARD_POWER_PIN_OUT)
+	/* Configure the Power pins */
 	px4_arch_configgpio(BOARD_POWER_PIN_OUT);
 	px4_arch_gpiowrite(BOARD_POWER_PIN_OUT, BOARD_POWER_ON);
 #endif
 
 #if INTERFACE_USB
 #if !defined(BOARD_USB_VBUS_SENSE_DISABLED)
-/* Use complete GPIO_OTGFS_VBUS configuration from board_config.h */
-	/* This preserves all GPIO flags: PORT, PIN, OPENDRAIN, SPEED, etc. */
-	px4_arch_configgpio(GPIO_OTGFS_VBUS);
+	/* enable configured GPIO to sample VBUS */
+#  if defined(USE_VBUS_PULL_DOWN)
+	px4_arch_configgpio((GPIO_OTGFS_VBUS & GPIO_PUPD_MASK) | GPIO_PULLDOWN);
+#  else
+	px4_arch_configgpio((GPIO_OTGFS_VBUS & GPIO_PUPD_MASK) | GPIO_FLOAT);
+#  endif
 #endif
 #endif
 
+#if INTERFACE_USART
+#endif
+
 #if defined(BOARD_FORCE_BL_PIN_IN) && defined(BOARD_FORCE_BL_PIN_OUT)
+	/* configure the force BL pins */
 	px4_arch_configgpio(BOARD_FORCE_BL_PIN_IN);
 	px4_arch_configgpio(BOARD_FORCE_BL_PIN_OUT);
 #endif
 
 #if defined(BOARD_FORCE_BL_PIN)
+	/* configure the force BL pins */
 	px4_arch_configgpio(BOARD_FORCE_BL_PIN);
 #endif
 
 #if defined(BOARD_PIN_LED_ACTIVITY)
+	/* Initialize LEDs */
 	px4_arch_configgpio(BOARD_PIN_LED_ACTIVITY);
 #endif
 #if defined(BOARD_PIN_LED_BOOTLOADER)
+	/* Initialize LEDs */
 	px4_arch_configgpio(BOARD_PIN_LED_BOOTLOADER);
 #endif
 }
 
-void board_deinit(void)
+void
+board_deinit(void)
 {
+
+#if INTERFACE_USART
+#endif
+
 #if INTERFACE_USB
 	px4_arch_configgpio(MK_GPIO_INPUT(GPIO_OTGFS_VBUS));
-	putreg32(RCC_AHB1RSTR_OTGFSRST, STM32_RCC_AHB1RSTR);
+	putreg32(RCC_AHB2RSTR_OTGFSRST, STM32_RCC_AHB2RSTR);
+	putreg32(0, STM32_RCC_AHB2RSTR);
 #endif
 
 #if defined(BOARD_FORCE_BL_PIN_IN) && defined(BOARD_FORCE_BL_PIN_OUT)
+	/* deinitialise the force BL pins */
 	px4_arch_configgpio(MK_GPIO_INPUT(BOARD_FORCE_BL_PIN_IN));
 	px4_arch_configgpio(MK_GPIO_INPUT(BOARD_FORCE_BL_PIN_OUT));
 #endif
 
 #if defined(BOARD_FORCE_BL_PIN)
+	/* deinitialise the force BL pin */
 	px4_arch_configgpio(MK_GPIO_INPUT(BOARD_FORCE_BL_PIN));
 #endif
 
 #if defined(BOARD_POWER_PIN_OUT) && defined(BOARD_POWER_PIN_RELEASE)
+	/* deinitialize the POWER pin - with the assumption the hold up time of
+	 * the voltage being bleed off by an inupt pin impedance will allow
+	 * enough time to boot the app
+	 */
 	px4_arch_configgpio(MK_GPIO_INPUT(BOARD_POWER_PIN_OUT));
 #endif
 
 #if defined(BOARD_PIN_LED_ACTIVITY)
+	/* Initialize LEDs */
 	px4_arch_configgpio(MK_GPIO_INPUT(BOARD_PIN_LED_ACTIVITY));
 #endif
 #if defined(BOARD_PIN_LED_BOOTLOADER)
+	/* Initialize LEDs */
 	px4_arch_configgpio(MK_GPIO_INPUT(BOARD_PIN_LED_BOOTLOADER));
 #endif
+
+
+
+	/* Clear any RSTR set above and disable the AHB peripheral clocks */
 
 	putreg32(0, STM32_RCC_AHB1RSTR);
 	putreg32(0, STM32_RCC_AHB1ENR);
@@ -178,47 +370,58 @@ inline void arch_systic_deinit(void)
 	systick_set_reload(0);  /* 1ms tick, magic number */
 }
 
-static inline void clock_init(void)
+/**
+  * @brief  Initializes the RCC clock configuration.
+  *
+  * @param  clock_setup : The clock configuration to set
+  */
+static inline void
+clock_init(void)
 {
-
-	modifyreg32(STM32_RCC_AHB1ENR, 0, RCC_AHB1ENR_GPIOAEN);
-	
-
-	modifyreg32(STM32_RCC_AHB2ENR, 0, RCC_AHB2ENR_OTGFSEN);
-	
-	/* Enable USART1 clock for bootloader serial interface */
-	modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_USART1EN);
-	
-	/* Small delay to ensure clock is stable */
-	for (volatile int i = 0; i < 1000; i++);
+	// Done by Nuttx
 }
 
-void clock_deinit(void)
+/**
+  * @brief  Resets the RCC clock configuration to the default reset state.
+  * @note   The default reset state of the clock configuration is given below:
+  *            - HSI ON and used as system clock source
+  *            - HSE, PLL and PLLI2S OFF
+  *            - AHB, APB1 and APB2 prescaler set to 1.
+  *            - CSS, MCO1 and MCO2 OFF
+  *            - All interrupts disabled
+  * @note   This function doesn't modify the configuration of the
+  *            - Peripheral clocks
+  *            - LSI, LSE and RTC clocks
+  */
+void
+clock_deinit(void)
 {
 	uint32_t regval;
 
+	/* Enable internal high-speed oscillator. */
 	regval = getreg32(STM32_RCC_CR);
 	regval |= RCC_CR_HSION;
 	putreg32(regval, STM32_RCC_CR);
 
+	/* Check if the HSIRDY flag is set in the CR */
 	while ((getreg32(STM32_RCC_CR) & RCC_CR_HSIRDY) == 0);
 
+	/* Reset the RCC_CFGR register */
 	putreg32(0, STM32_RCC_CFGR);
 
-	// For STM32F4: Stop HSE, CSS, PLL
+	/* Stop the HSE, CSS, PLL */
 	regval  = getreg32(STM32_RCC_CR);
 	regval  &= ~(RCC_CR_HSEON | RCC_CR_PLLON);
 	putreg32(regval, STM32_RCC_CR);
 
-#ifdef STM32_RCC_PLLCFGR
-	putreg32(0x00000000, STM32_RCC_PLLCFGR);
-#else
-	/* STM32F4 doesn't have PLLCFGR register */
-#endif
+	/* Reset the RCC_PLLCFG register to STM32F4 default */
+	putreg32(0x24003010, STM32_RCC_PLLCFG);
 
+	/* Reset the HSEBYP bit */
 	regval  = getreg32(STM32_RCC_CR);
 	regval  &= ~(RCC_CR_HSEBYP);
 	putreg32(regval, STM32_RCC_CR);
+
 }
 
 void arch_flash_lock(void)
@@ -228,6 +431,7 @@ void arch_flash_lock(void)
 
 void arch_flash_unlock(void)
 {
+	fc_reset();
 	stm32_flash_unlock();
 }
 
@@ -241,7 +445,8 @@ inline void arch_setvtor(const uint32_t *address)
 	putreg32((uint32_t)address, NVIC_VECTAB);
 }
 
-uint32_t flash_func_sector_size(unsigned sector)
+uint32_t
+flash_func_sector_size(unsigned sector)
 {
 	if (sector <= BOARD_FLASH_SECTORS) {
 		return 128 * 1024;
@@ -250,7 +455,8 @@ uint32_t flash_func_sector_size(unsigned sector)
 	return 0;
 }
 
-void flash_func_erase_sector(unsigned sector, bool force)
+void
+flash_func_erase_sector(unsigned sector, bool force)
 {
 	if (sector > BOARD_FLASH_SECTORS || (int)sector < BOARD_FIRST_FLASH_SECTOR_TO_ERASE) {
 		return;
@@ -261,22 +467,27 @@ void flash_func_erase_sector(unsigned sector, bool force)
 	}
 }
 
-void flash_func_write_word(uintptr_t address, uint32_t word)
+void
+flash_func_write_word(uintptr_t address, uint32_t word)
 {
 	address += APP_LOAD_ADDRESS;
-	up_progmem_write(address, (const void *)&word, sizeof(word));
+	fc_write(address, word);
 }
 
 uint32_t flash_func_read_word(uintptr_t address)
 {
+
 	if (address & 3) {
 		return 0;
 	}
 
-	return *(uint32_t *)(address + APP_LOAD_ADDRESS);
+	return fc_read(address + APP_LOAD_ADDRESS);
+
 }
 
-uint32_t flash_func_read_otp(uintptr_t address)
+
+uint32_t
+flash_func_read_otp(uintptr_t address)
 {
 	return 0;
 }
@@ -288,29 +499,59 @@ uint32_t get_mcu_id(void)
 
 int get_mcu_desc(int max, uint8_t *revstr)
 {
-	/* Simple MCU description for STM32F427 */
-	const char *desc = "STM32F427";
-	uint8_t *strp = revstr;
-	uint8_t *endp = &revstr[max - 1];
+	uint32_t idcode = (*(uint32_t *) STM32_DEBUGMCU_BASE);
+	int32_t mcuid = idcode & DEVID_MASK;
+	mcu_rev_e revid = (idcode & REVID_MASK) >> 16;
 
-	while (strp < endp && *desc) {
-		*strp++ = *desc++;
+	mcu_des_t des = mcu_descriptions[STM32_UNKNOWN];
+
+	for (unsigned int i = 0; i < arraySize(mcu_descriptions); i++) {
+		if (mcuid == mcu_descriptions[i].mcuid) {
+			des = mcu_descriptions[i];
+			break;
+		}
 	}
 
-	return strp - revstr;
+	for (unsigned int i = 0; i < arraySize(silicon_revs); i++) {
+		if (silicon_revs[i].revid == revid) {
+			des.rev = silicon_revs[i].rev;
+		}
+	}
+
+	uint8_t *endp = &revstr[max - 1];
+	uint8_t *strp = revstr;
+
+	while (strp < endp && *des.desc) {
+		*strp++ = *des.desc++;
+	}
+
+	if (strp < endp) {
+		*strp++ = ',';
+	}
+
+	if (strp < endp) {
+		*strp++ = des.rev;
+	}
+
+	return  strp - revstr;
 }
+
 
 int check_silicon(void)
 {
 	return 0;
 }
 
-uint32_t flash_func_read_sn(uintptr_t address)
+uint32_t
+flash_func_read_sn(uintptr_t address)
 {
+	// read a byte out from unique chip ID area
+	// it's 12 bytes, or 3 words.
 	return *(uint32_t *)(address + STM32_SYSMEM_UID);
 }
 
-void led_on(unsigned led)
+void
+led_on(unsigned led)
 {
 	switch (led) {
 	case LED_ACTIVITY:
@@ -327,7 +568,8 @@ void led_on(unsigned led)
 	}
 }
 
-void led_off(unsigned led)
+void
+led_off(unsigned led)
 {
 	switch (led) {
 	case LED_ACTIVITY:
@@ -344,7 +586,8 @@ void led_off(unsigned led)
 	}
 }
 
-void led_toggle(unsigned led)
+void
+led_toggle(unsigned led)
 {
 	switch (led) {
 	case LED_ACTIVITY:
@@ -361,12 +604,16 @@ void led_toggle(unsigned led)
 	}
 }
 
+/* we should know this, but we don't */
 #ifndef SCB_CPACR
 # define SCB_CPACR (*((volatile uint32_t *) (((0xE000E000UL) + 0x0D00UL) + 0x088)))
 #endif
 
-void arch_do_jump(const uint32_t *app_base)
+/* Make the actual jump to app */
+void
+arch_do_jump(const uint32_t *app_base)
 {
+	/* extract the stack and entrypoint from the app vector table and go */
 	uint32_t stacktop = app_base[0];
 	uint32_t entrypoint = app_base[1];
 
@@ -375,35 +622,70 @@ void arch_do_jump(const uint32_t *app_base)
 		"bx %1  \n"
 		: : "r"(stacktop), "r"(entrypoint) :);
 
+	// just to keep noreturn happy
 	for (;;) ;
 }
 
-int bootloader_main(void)
+int
+bootloader_main(void)
 {
-	bool try_boot = true;
-	unsigned timeout = BOOTLOADER_DELAY;
+	bool try_boot = true;			/* try booting before we drop to the bootloader */
+	unsigned timeout = BOOTLOADER_DELAY;	/* if nonzero, drop out of the bootloader after this time */
 
 	/* Enable the FPU before we hit any FP instructions */
-	SCB_CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2));
+	SCB_CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2)); /* set CP10 Full Access and set CP11 Full Access */
 
 #if defined(BOARD_POWER_PIN_OUT)
+
+	/* Here we check for the app setting the POWER_DOWN_RTC_SIGNATURE
+	 * in this case, we reset the signature and wait to die
+	 */
 	if (board_get_rtc_signature() == POWER_DOWN_RTC_SIGNATURE) {
 		board_set_rtc_signature(0);
+
 		while (1);
 	}
+
 #endif
 
+	/* do board-specific initialisation */
 	board_init();
+
+	/* configure the clock for bootloader activity */
 	clock_init();
 
+	/*
+	 * Check the force-bootloader register; if we find the signature there, don't
+	 * try booting.
+	 */
 	if (board_get_rtc_signature() == BOOT_RTC_SIGNATURE) {
+
+		/*
+		 * Don't even try to boot before dropping to the bootloader.
+		 */
 		try_boot = false;
+
+		/*
+		 * Don't drop out of the bootloader until something has been uploaded.
+		 */
 		timeout = 0;
+
+		/*
+		 * Clear the signature so that if someone resets us while we're
+		 * in the bootloader we'll try to boot next time.
+		 */
 		board_set_rtc_signature(0);
 	}
 
 #ifdef BOOT_DELAY_ADDRESS
 	{
+		/*
+		  if a boot delay signature is present then delay the boot
+		  by at least that amount of time in seconds. This allows
+		  for an opportunity for a companion computer to load a
+		  new firmware, while still booting fast by sending a BOOT
+		  command
+		 */
 		uint32_t sig1 = flash_func_read_word(BOOT_DELAY_ADDRESS);
 		uint32_t sig2 = flash_func_read_word(BOOT_DELAY_ADDRESS + 4);
 
@@ -422,56 +704,118 @@ int bootloader_main(void)
 	}
 #endif
 
+	/*
+	 * Check if the force-bootloader pins are strapped; if strapped,
+	 * don't try booting.
+	 */
 	if (board_test_force_pin()) {
 		try_boot = false;
 	}
 
 #if INTERFACE_USB
+
+	/*
+	 * Check for USB connection - if present, don't try to boot, but set a timeout after
+	 * which we will fall out of the bootloader.
+	 *
+	 * If the force-bootloader pins are tied, we will stay here until they are removed and
+	 * we then time out.
+	 */
 #if defined(BOARD_VBUS)
+
 	if (px4_arch_gpioread(BOARD_VBUS) != 0) {
 		usb_connected = true;
+		/* don't try booting before we set up the bootloader */
 		try_boot = false;
 	}
+
 #else
 	try_boot = false;
-#endif
-#endif
 
-	(void)try_boot;
-	try_boot = false;
-	timeout = 10000; 
-	
-#if defined(BOARD_PIN_LED_ACTIVITY)
-	px4_arch_gpiowrite(BOARD_PIN_LED_ACTIVITY, BOARD_LED_ON);
-	for(volatile int i = 0; i < 1000000; i++);  
-	px4_arch_gpiowrite(BOARD_PIN_LED_ACTIVITY, BOARD_LED_OFF);
-	for(volatile int i = 0; i < 1000000; i++);  
-	px4_arch_gpiowrite(BOARD_PIN_LED_ACTIVITY, BOARD_LED_ON);
+#endif
 #endif
 
 #if INTERFACE_USART
-#ifdef INTERFACE_USART_CONFIG
-	cinit(INTERFACE_USART_CONFIG, USART);
-#endif
-#endif
-#if INTERFACE_USB
-#ifdef INTERFACE_USB_CONFIG
-	cinit(INTERFACE_USB_CONFIG, USB);
-#endif
+
+	/*
+	 * Check for if the USART port RX line is receiving a break command, or is being held low. If yes,
+	 * don't try to boot, but set a timeout after
+	 * which we will fall out of the bootloader.
+	 *
+	 * If the force-bootloader pins are tied, we will stay here until they are removed and
+	 * we then time out.
+	 */
+	if (board_test_usart_receiving_break()) {
+		try_boot = false;
+	}
+
 #endif
 
-	while (1) {
-		bootloader(timeout);
+	/* Try to boot the app if we think we should just go straight there */
+	if (try_boot) {
 
-		if (board_test_force_pin()) {
-			continue;
-		}
-
+		/* set the boot-to-bootloader flag so that if boot fails on reset we will stop here */
 #ifdef BOARD_BOOT_FAIL_DETECT
 		board_set_rtc_signature(BOOT_RTC_SIGNATURE);
 #endif
 
+		/* try to boot immediately */
 		jump_to_app();
+
+		// If it failed to boot, reset the boot signature and stay in bootloader
+		board_set_rtc_signature(BOOT_RTC_SIGNATURE);
+
+		/* booting failed, stay in the bootloader forever */
+		timeout = 0;
+	}
+
+
+	/* start the interface */
+#if INTERFACE_USART
+	cinit(BOARD_INTERFACE_CONFIG_USART, USART);
+#endif
+#if INTERFACE_USB
+	cinit(BOARD_INTERFACE_CONFIG_USB, USB);
+#endif
+
+
+#if 0
+	// MCO1/02
+	gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO8);
+	gpio_set_output_options(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_100MHZ, GPIO8);
+	gpio_set_af(GPIOA, GPIO_AF0, GPIO8);
+	gpio_mode_setup(GPIOC, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO9);
+	gpio_set_af(GPIOC, GPIO_AF0, GPIO9);
+#endif
+
+
+	while (1) {
+		/* run the bootloader, come back after an app is uploaded or we time out */
+		bootloader(timeout);
+
+		/* if the force-bootloader pins are strapped, just loop back */
+		if (board_test_force_pin()) {
+			continue;
+		}
+
+#if INTERFACE_USART
+
+		/* if the USART port RX line is still receiving a break, just loop back */
+		if (board_test_usart_receiving_break()) {
+			continue;
+		}
+
+#endif
+
+		/* set the boot-to-bootloader flag so that if boot fails on reset we will stop here */
+#ifdef BOARD_BOOT_FAIL_DETECT
+		board_set_rtc_signature(BOOT_RTC_SIGNATURE);
+#endif
+
+		/* look to see if we can boot the app */
+		jump_to_app();
+
+		/* launching the app failed - stay in the bootloader forever */
 		timeout = 0;
 	}
 }

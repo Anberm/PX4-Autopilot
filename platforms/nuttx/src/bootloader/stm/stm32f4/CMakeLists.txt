@@ -33,6 +33,7 @@
 
 px4_add_library(arch_bootloader
 	main.c
+	systick.c
 )
 
 target_link_libraries(arch_bootloader
