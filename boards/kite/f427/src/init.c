@@ -179,7 +179,8 @@ stm32_boardinitialize(void)
 
 	// Configure LEDs.
 	board_autoled_initialize();
-
+	// Initialize USB GPIO
+	stm32_usbinitialize();
 
 	// Configure ADC pins.
 	stm32_configgpio(GPIO_ADC1_IN2);	/* BATT_VOLTAGE_SENS */
@@ -297,8 +298,8 @@ __EXPORT int board_app_initialize(uintptr_t arg)
 	}
 
 
-	// Default SPI1 to 1MHz
-	SPI_SETFREQUENCY(spi1, 10000000);
+	// Default SPI1 to 1MHz (conservative for bring-up)
+	SPI_SETFREQUENCY(spi1, 1000000);
 	SPI_SETBITS(spi1, 8);
 	SPI_SETMODE(spi1, SPIDEV_MODE3);
 	up_udelay(20);
@@ -312,12 +313,12 @@ __EXPORT int board_app_initialize(uintptr_t arg)
 	}
 
 	/**
-	 * Default SPI2 to 12MHz and de-assert the known chip selects.
+	 * Default SPI2 to 10MHz for bring-up (MS5611 supports up to 20MHz).
 	 * MS5611 has max SPI clock speed of 20MHz.
 	 */
 
-	// XXX start with 10.4 MHz and go up to 20 once validated.
-	SPI_SETFREQUENCY(spi2, 20 * 1000 * 1000);
+	// Start with 10MHz and go up to 20 once validated.
+	SPI_SETFREQUENCY(spi2, 10 * 1000 * 1000);
 	SPI_SETBITS(spi2, 8);
 	SPI_SETMODE(spi2, SPIDEV_MODE3);
 
