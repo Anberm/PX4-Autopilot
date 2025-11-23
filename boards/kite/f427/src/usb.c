@@ -105,3 +105,20 @@ __EXPORT void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
 	uinfo("resume: %d\n", resume);
 }
+
+/************************************************************************************
+ * Name: board_read_VBUS_state
+ *
+ * Description:
+ *   Read the VBUS state. On this board, PA9 is not wired to VBUS, so we
+ *   always return 0 (USB connected) to allow USB enumeration.
+ *
+ ************************************************************************************/
+
+__EXPORT int board_read_VBUS_state(void)
+{
+	/* PA9 (VBUS sense) is not wired on this hardware,
+	 * so always return 0 (USB connected) to enable USB CDC/ACM
+	 */
+	return 0;
+}

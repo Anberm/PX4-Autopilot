@@ -103,9 +103,9 @@
 
 /**
  * USB OTG FS:
- * PA9  OTG_FS_VBUS VBUS sensing.
+ * PA9  OTG_FS_VBUS VBUS sensing (with pulldown for proper detection).
  */
-#define GPIO_OTGFS_VBUS              (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
+#define GPIO_OTGFS_VBUS              (GPIO_INPUT|GPIO_PULLDOWN|GPIO_SPEED_100MHz|GPIO_PORTA|GPIO_PIN9)
 
 /* High-resolution timer */
 #define HRT_TIMER                    3  /* use timer 3 for the HRT */
