@@ -34,7 +34,10 @@
 /**
  * @file board_config.h
  *
- * PX4FMUv4 internal definitions
+ * Kite F427 board configuration
+ * Hardware: STM32F427VIT6 LQFP-100
+ * IMU: BMI088, Magnetometer: QMC5883L, Barometer: SPL06-001
+ * Storage: FM25V02A FRAM + CSNP32GCR01 32GB eMMC
  */
 
 #pragma once
@@ -53,10 +56,12 @@
 /* Configuration ************************************************************************************/
 
 /* PX4FMU GPIOs ***********************************************************************************/
-/* LEDs */
-/* LED Activity on PA2 (GPIO2), LED Bootloader on PC3 (GPIO3) */
-#define GPIO_nLED_RED                (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTA|GPIO_PIN2)
-#define GPIO_nLED_GREEN              (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN3)
+/* LEDs - Active Low Configuration
+ * Based on hardware design, LEDs are typically connected to:
+ * - Status LED should be visible during operation
+ */
+#define GPIO_nLED_RED                (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN11)
+#define GPIO_nLED_GREEN              (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN1)
 #define GPIO_nLED_BLUE               (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN3)
 
 #define GPIO_LED_RED                 GPIO_nLED_RED
@@ -103,9 +108,10 @@
 
 /**
  * USB OTG FS:
- * PA9  OTG_FS_VBUS VBUS sensing (with pulldown for proper detection).
+ * PA9  OTG_FS_VBUS VBUS sensing
+ * Type-C connector (J4) on board
  */
-#define GPIO_OTGFS_VBUS              (GPIO_INPUT|GPIO_PULLDOWN|GPIO_SPEED_100MHz|GPIO_PORTA|GPIO_PIN9)
+#define GPIO_OTGFS_VBUS              (GPIO_INPUT|GPIO_FLOAT|GPIO_SPEED_100MHz|GPIO_OPENDRAIN|GPIO_PORTA|GPIO_PIN9)
 
 /* High-resolution timer */
 #define HRT_TIMER                    3  /* use timer 3 for the HRT */
@@ -124,16 +130,19 @@
 #define GPIO_PWM_IN                  GPIO_TIM4_CH2IN_2
 
 #define GPIO_RSSI_IN                 (GPIO_INPUT|GPIO_PULLUP|GPIO_PORTC|GPIO_PIN1)
-/* Safety button and LED - PC3 is used for LED, moved safety to PC4 */
+/* Safety button and LED */
+#define GPIO_LED_SAFETY              (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN3)
 #define GPIO_BTN_SAFETY              (GPIO_INPUT|GPIO_PULLUP|GPIO_PORTC|GPIO_PIN4)
 #define GPIO_PERIPH_3V3_EN           (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN5)
 
-/* For R12, this signal is active high. */
+/* RC Input Inversion - Active high for SBUS */
 #define GPIO_SBUS_INV                (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN13)
 #define RC_INVERT_INPUT(_invert_true) px4_arch_gpiowrite(GPIO_SBUS_INV, _invert_true)
 
+/* Spektrum Power Control */
 #define GPIO_SPEKTRUM_PWR_EN         (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN4)
 
+/* ESP8266 WiFi Module GPIOs (Optional - SPI4 conflict detection) */
 #define GPIO_8266_GPIO0              (GPIO_INPUT|GPIO_PULLUP|GPIO_PORTE|GPIO_PIN2)
 #define GPIO_8266_GPIO2              (GPIO_INPUT|GPIO_PULLUP|GPIO_PORTB|GPIO_PIN4)
 #define GPIO_8266_PD                 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN5)

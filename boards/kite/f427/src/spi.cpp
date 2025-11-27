@@ -31,6 +31,17 @@
  *
  ****************************************************************************/
 
+/**
+ * @file spi.cpp
+ *
+ * Kite F427 SPI Bus Configuration
+ * 
+ * Hardware SPI Devices:
+ * SPI1: BMI088 IMU (Gyro + Accel), CS on PC2, DRDY on PD15
+ * SPI2: FM25V02A FRAM (CS on PD10), SPL06-001 Barometer (CS on PD7)
+ * SPI4: External devices (optional, CS on PA8)
+ */
+
 #include <px4_arch/spi_hw_description.h>
 #include <drivers/drv_sensor.h>
 #include <nuttx/spi/spi.h>

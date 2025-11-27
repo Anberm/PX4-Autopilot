@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/px4fmu/include/board.h
+ * configs/kite-f427/include/board.h
  * include/arch/board/board.h
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.

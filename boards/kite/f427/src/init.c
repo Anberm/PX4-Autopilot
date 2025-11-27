@@ -37,8 +37,12 @@
  * Kite F427 specific early startup code. This file implements the
  * board_app_initialize() function that is called early by nsh during startup.
  * 
- * Hardware: STM32F427VIT6 based flight controller
- * Based on FMUv4 with Kite-specific modifications
+ * Hardware: STM32F427VIT6 based flight controller (LQFP-100)
+ * - IMU: BMI088 (Gyro + Accel) on SPI1
+ * - Magnetometer: QMC5883L on I2C1
+ * - Barometer: SPL06-001 on SPI2
+ * - Storage: FM25V02A FRAM on SPI2, CSNP32GCR01 32GB eMMC
+ * - Crystal: 24MHz HSE
  *
  * Code here is run before the rcS script is invoked; it should start required
  * subsystems and perform board-specific initialization.
@@ -182,43 +186,48 @@ stm32_boardinitialize(void)
 	// Initialize USB GPIO
 	stm32_usbinitialize();
 
-	// Configure ADC pins.
-	stm32_configgpio(GPIO_ADC1_IN2);	/* BATT_VOLTAGE_SENS */
-	stm32_configgpio(GPIO_ADC1_IN3);	/* BATT_CURRENT_SENS */
-	stm32_configgpio(GPIO_ADC1_IN4);	/* VDD_5V_SENS */
-	stm32_configgpio(GPIO_ADC1_IN11);	/* RSSI analog in */
+	// Configure ADC pins for battery monitoring and power sensing.
+	stm32_configgpio(GPIO_ADC1_IN2);  /* BATT_VOLTAGE_SENS */
+	stm32_configgpio(GPIO_ADC1_IN3);  /* BATT_CURRENT_SENS */
+	stm32_configgpio(GPIO_ADC1_IN4);  /* VDD_5V_SENS */
+	stm32_configgpio(GPIO_ADC1_IN11); /* RSSI analog in */
 
-	// Configure CAN interface
+	// Configure CAN interface (CAN1 for UAVCAN)
 	stm32_configgpio(GPIO_CAN1_RX);
 	stm32_configgpio(GPIO_CAN1_TX);
 
 	// Configure power supply control/sense pins.
-	stm32_configgpio(GPIO_PERIPH_3V3_EN);
-	stm32_configgpio(GPIO_VDD_BRICK_VALID);
-	stm32_configgpio(GPIO_VDD_USB_VALID);
+	stm32_configgpio(GPIO_PERIPH_3V3_EN);    /* Peripheral 3.3V power enable */
+	stm32_configgpio(GPIO_VDD_BRICK_VALID);  /* Power brick valid detection */
+	stm32_configgpio(GPIO_VDD_USB_VALID);    /* USB power valid detection */
 
+	// Configure RC input and telemetry inversion control
 	stm32_configgpio(GPIO_SBUS_INV);
 	stm32_configgpio(GPIO_SPEKTRUM_PWR_EN);
 
+	// Configure ESP8266 WiFi module GPIOs (for SPI4 bus detection)
 	stm32_configgpio(GPIO_8266_GPIO2);
 	stm32_configgpio(GPIO_8266_GPIO0);
 
-	// Safety - led on in led driver.
+	// Safety button and LED configuration.
 	stm32_configgpio(GPIO_BTN_SAFETY);
+	stm32_configgpio(GPIO_LED_SAFETY);
 	stm32_configgpio(GPIO_PPM_IN);
 
 #if defined(CONFIG_STM32_SPI4)
-
-	/* We have SPI4 is GPIO_8266_GPIO2 PB4 pin 3 Low */
+	/* SPI4 availability determined by GPIO_8266_GPIO2 pin state (PB4 pin 3)
+	 * Low: SPI4 enabled for external devices
+	 * High: SPI4 disabled, ESP8266 WiFi module active
+	 */
 	if (stm32_gpioread(GPIO_8266_GPIO2) != 0) {
 #endif /* CONFIG_STM32_SPI4 */
 
+		// ESP8266 WiFi module control pins
 		stm32_configgpio(GPIO_8266_PD);
 		stm32_configgpio(GPIO_8266_RST);
 
 #if defined(CONFIG_STM32_SPI4)
 	}
-
 #endif /* CONFIG_STM32_SPI4 */
 
 	// Configure SPI all interfaces GPIO & enable power.
@@ -313,11 +322,11 @@ __EXPORT int board_app_initialize(uintptr_t arg)
 	}
 
 	/**
-	 * Default SPI2 to 10MHz for bring-up (MS5611 supports up to 20MHz).
-	 * MS5611 has max SPI clock speed of 20MHz.
+	 * Default SPI2 to 10MHz for bring-up.
+	 * SPL06-001 barometer and FM25V02A FRAM on SPI2.
+	 * SPL06 supports up to 10MHz SPI clock.
 	 */
-
-	// Start with 10MHz and go up to 20 once validated.
+	// Start with 10MHz for reliable operation
 	SPI_SETFREQUENCY(spi2, 10 * 1000 * 1000);
 	SPI_SETBITS(spi2, 8);
 	SPI_SETMODE(spi2, SPIDEV_MODE3);
@@ -345,13 +354,15 @@ __EXPORT int board_app_initialize(uintptr_t arg)
 
 
 #ifdef CONFIG_MMCSD
-
+	/* Initialize eMMC storage (32GB CSNP32GCR01-AOW)
+	 * Connected via SDIO interface
+	 */
 	// First, get an instance of the SDIO interface.
 	sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
 
 	if (!sdio) {
 		led_on(LED_RED);
-		syslog(LOG_ERR, "[boot] Failed to initialize SDIO slot %d\n", CONFIG_NSH_MMCSDSLOTNO);
+		syslog(LOG_ERR, "[boot] Failed to initialize SDIO slot %d (eMMC)\n", CONFIG_NSH_MMCSDSLOTNO);
 	}
 
 	// Now bind the SDIO interface to the MMC/SD driver.
@@ -362,7 +373,7 @@ __EXPORT int board_app_initialize(uintptr_t arg)
 		syslog(LOG_ERR, "[boot] Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
 	}
 
-	// Then let's guess and say that there is a card in the slot. There is no card detect GPIO.
+	// eMMC is always present (soldered on board), notify media change.
 	sdio_mediachange(sdio, true);
 
 #endif
