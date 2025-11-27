@@ -31,6 +31,16 @@
  *
  ****************************************************************************/
 
+/**
+ * @file timer_config.cpp
+ *
+ * Kite F427 Timer/PWM Configuration
+ * 
+ * PWM Output Channels (6 channels):
+ * Timer1: PE14 (CH4), PE13 (CH3), PE11 (CH2), PE9 (CH1)
+ * Timer4: PD13 (CH2), PD14 (CH3)
+ */
+
 #include <px4_arch/io_timer_hw_description.h>
 
 constexpr io_timers_t io_timers[MAX_IO_TIMERS] = {

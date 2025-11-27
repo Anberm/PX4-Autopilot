@@ -34,7 +34,9 @@
 /**
  * @file led.c
  *
- * PX4FMU LED backend.
+ * Kite F427 LED backend.
+ * LEDs: Red (PB11), Green (PB1), Blue (PB3)
+ * Active high configuration (set to turn on)
  */
 
 #include <px4_platform_common/px4_config.h>
@@ -63,10 +65,10 @@ __END_DECLS
 
 
 static uint32_t g_ledmap[] = {
-	GPIO_nLED_BLUE,   // Indexed by LED_BLUE
-	GPIO_nLED_RED,    // Indexed by LED_RED, LED_AMBER
-	GPIO_nLED_GREEN,  // Indexed by LED_SAFETY (Bootloader LED on PC3)
-	GPIO_nLED_GREEN,  // Indexed by LED_GREEN
+	GPIO_nLED_BLUE,   // Indexed by LED_BLUE (PB3)
+	GPIO_nLED_RED,    // Indexed by LED_RED, LED_AMBER (PB11)
+	GPIO_LED_SAFETY,  // Indexed by LED_SAFETY (PC3)
+	GPIO_nLED_GREEN,  // Indexed by LED_GREEN (PB1)
 };
 
 __EXPORT void led_init(void)
