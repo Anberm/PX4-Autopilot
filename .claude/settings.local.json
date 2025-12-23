@@ -1,0 +1,40 @@
+{
+  "project": {
+    "name": "PX4-Autopilot",
+    "description": "PX4 无人机飞控固件多专家协作系统"
+  },
+  "experts": {
+    "coordinator": {
+      "model": "sonnet",
+      "description": "多专家协调者"
+    },
+    "px4-firmware-expert": {
+      "model": "opus",
+      "description": "PX4 固件核心专家"
+    },
+    "flight-control-expert": {
+      "model": "opus",
+      "description": "飞控算法专家"
+    },
+    "driver-expert": {
+      "model": "sonnet",
+      "description": "驱动开发专家"
+    },
+    "test-expert": {
+      "model": "sonnet",
+      "description": "测试专家"
+    },
+    "project-manager": {
+      "model": "sonnet",
+      "description": "项目管理专家"
+    }
+  },
+  "commands": {
+    "/coordinator": "多专家协调",
+    "/px4-expert": "固件核心开发",
+    "/fc-expert": "飞控算法开发",
+    "/driver-expert": "驱动开发",
+    "/test-expert": "测试任务",
+    "/pm": "项目管理"
+  }
+}
