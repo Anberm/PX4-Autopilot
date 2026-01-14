@@ -1,6 +1,6 @@
 # Neural Networks
 
-<Badge type="tip" text="main (planned for: PX4 v1.17)" /> <Badge type="warning" text="Experimental" />
+<Badge type="tip" text="PX4 v1.17" /> <Badge type="warning" text="Experimental" />
 
 ::: warning
 This is an experimental module.
@@ -25,6 +25,10 @@ The other documents in the section provide more information about the integratio
 If you are looking for more resources to learn about the module, a website has been created with links to a youtube video and a workshop paper. A full master's thesis will be added later. [A Neural Network Mode for PX4 on Embedded Flight Controllers](https://ntnu-arl.github.io/px4-nns/).
 
 ## Neural Network PX4 Firmware
+
+::: warning
+This module requires Ubuntu 24.04 or newer (it is not supported in Ubuntu 22.04).
+:::
 
 The module has been tested on a number of configurations, which can be build locally using the commands:
 
