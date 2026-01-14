@@ -63,6 +63,7 @@ set(msg_files
 	DebugKeyValue.msg
 	DebugValue.msg
 	DebugVect.msg
+	DeviceInformation.msg
 	DifferentialPressure.msg
 	DistanceSensor.msg
 	DistanceSensorModeChangeRequest.msg
@@ -98,6 +99,7 @@ set(msg_files
 	GeneratorStatus.msg
 	GeofenceResult.msg
 	GeofenceStatus.msg
+	GainCompression.msg
 	GimbalControls.msg
 	GimbalDeviceAttitudeStatus.msg
 	GimbalDeviceInformation.msg
